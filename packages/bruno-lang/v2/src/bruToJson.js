@@ -41,7 +41,7 @@ const ANNOTATIONS_KEY = Symbol('annotations');
  *
  */
 const grammar = ohm.grammar(`Bru {
-  BruFile = (meta | http | grpc | ws | query | params | headers | metadata | auths | bodies | varsandassert | script | tests | app | settings | docs | example)*
+  BruFile = (meta | http | grpc | ws | query | params | headers | metadata | auths | bodies | varsandassert | script | tests | app | settings | docs | example | flow)*
   auths = authawsv4 | authbasic | authbearer | authdigest | authNTLM | authOAuth1 | authOAuth2 | authwsse | authapikey | authedgegrid | authOauth2Configs
   bodies = bodyjson | bodytext | bodyxml | bodysparql | bodygraphql | bodygraphqlvars | bodyforms | body | bodygrpc | bodyws
   bodyforms = bodyformurlencoded | bodymultipart | bodyfile
@@ -119,6 +119,7 @@ const grammar = ohm.grammar(`Bru {
   meta = "meta" dictionary
   app = "app" dictionary
   settings = "settings" dictionary
+  flow = "flow" dictionary
 
   http = get | post | put | delete | patch | options | head | connect | trace | httpcustom
   grpc = "grpc" dictionary
@@ -547,6 +548,25 @@ const sem = grammar.createSemantics().addAttribute('ast', {
       app: {
         code: appData.code || null,
         enabled: toBool(appData.enabled)
+      }
+    };
+  },
+  flow(_1, dictionary) {
+    const flowData = mapPairListToKeyValPair(dictionary.ast);
+    let parsedData = {};
+    if (flowData.data) {
+      try {
+        parsedData = JSON.parse(flowData.data);
+      } catch (e) {
+        parsedData = {};
+      }
+    }
+    return {
+      flow: {
+        nodes: parsedData.nodes || [],
+        edges: parsedData.edges || [],
+        viewport: parsedData.viewport || { x: 0, y: 0, zoom: 1 },
+        config: parsedData.config || {}
       }
     };
   },

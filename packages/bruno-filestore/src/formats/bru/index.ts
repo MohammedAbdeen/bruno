@@ -28,6 +28,25 @@ export const parseBruRequest = (data: string | any, parsed: boolean = false): an
       };
     }
 
+    if (_.get(json, 'meta.type') === 'flow') {
+      const seq = _.get(json, 'meta.seq');
+      const tags = _.get(json, 'meta.tags', []);
+      return {
+        type: 'flow',
+        name: _.get(json, 'meta.name'),
+        seq: !_.isNaN(seq) ? Number(seq) : 1,
+        tags: Array.isArray(tags) ? tags : [],
+        settings: _.get(json, 'settings', {}),
+        flow: _.get(json, 'flow', {
+          nodes: [],
+          edges: [],
+          viewport: { x: 0, y: 0, zoom: 1 },
+          config: {}
+        }),
+        request: null
+      };
+    }
+
     let requestType = _.get(json, 'meta.type');
     switch (requestType) {
       case 'http':
@@ -151,6 +170,27 @@ export const stringifyBruRequest = (json: any): string => {
         },
         settings: _.get(json, 'settings', {}),
         app: { code: _.get(json, 'app.code', '') }
+      };
+      return jsonToBruV2(bruJson);
+    }
+
+    // Flow item — emit meta, settings, and flow data block.
+    if (_.get(json, 'type') === 'flow') {
+      const seq = _.get(json, 'seq');
+      const bruJson: any = {
+        meta: {
+          name: _.get(json, 'name'),
+          type: 'flow',
+          seq: !_.isNaN(seq) ? Number(seq) : 1,
+          tags: _.get(json, 'tags', [])
+        },
+        settings: _.get(json, 'settings', {}),
+        flow: _.get(json, 'flow', {
+          nodes: [],
+          edges: [],
+          viewport: { x: 0, y: 0, zoom: 1 },
+          config: {}
+        })
       };
       return jsonToBruV2(bruJson);
     }

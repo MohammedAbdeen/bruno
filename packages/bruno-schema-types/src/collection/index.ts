@@ -16,6 +16,12 @@ export type {
   ItemType,
   ItemSettings,
   HttpItemSettings,
-  WebSocketItemSettings
+  WebSocketItemSettings,
+  Flow,
+  FlowNode,
+  FlowEdge,
+  FlowViewport,
+  FlowNodeType,
+  FlowNodePosition
 } from './item';
 export type { Collection, RunnerResult } from './collection';

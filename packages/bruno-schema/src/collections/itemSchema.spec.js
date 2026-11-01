@@ -195,4 +195,55 @@ describe('Item Schema Validation', () => {
 
     await expect(itemSchema.validate(item)).rejects.toBeTruthy();
   });
+
+  describe('flow item validation', () => {
+    it('item schema must validate a valid flow item', async () => {
+      const item = {
+        uid: uuid(),
+        name: 'Order Processing Flow',
+        type: 'flow',
+        flow: {
+          nodes: [
+            {
+              id: 'start-1',
+              type: 'start',
+              position: { x: 100, y: 100 },
+              data: {}
+            },
+            {
+              id: 'req-1',
+              type: 'request',
+              position: { x: 300, y: 100 },
+              data: {
+                itemRef: 'users/login.bru'
+              }
+            }
+          ],
+          edges: [
+            {
+              id: 'e1-2',
+              source: 'start-1',
+              target: 'req-1'
+            }
+          ],
+          viewport: { x: 0, y: 0, zoom: 1 }
+        }
+      };
+
+      const isValid = await itemSchema.validate(item);
+      expect(isValid).toBeTruthy();
+    });
+
+    it('item schema must throw an error if flow is not present when item-type is flow', async () => {
+      const item = {
+        uid: uuid(),
+        name: 'Order Processing Flow',
+        type: 'flow'
+      };
+
+      await expect(itemSchema.validate(item)).rejects.toEqual(
+        validationErrorWithMessages('flow is required when item-type is flow')
+      );
+    });
+  });
 });

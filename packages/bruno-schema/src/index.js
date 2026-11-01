@@ -1,8 +1,19 @@
-const { collectionSchema, itemSchema, environmentSchema, environmentsSchema } = require('./collections');
+const {
+  collectionSchema,
+  itemSchema,
+  environmentSchema,
+  environmentsSchema,
+  flowSchema,
+  flowNodeSchema,
+  flowEdgeSchema
+} = require('./collections');
 
 module.exports = {
   itemSchema,
   environmentSchema,
   environmentsSchema,
-  collectionSchema
+  collectionSchema,
+  flowSchema,
+  flowNodeSchema,
+  flowEdgeSchema
 };
