@@ -1948,6 +1948,104 @@ export const newApp = (params) => (dispatch, getState) => {
   });
 };
 
+export const newFlow = (params) => (dispatch, getState) => {
+  const { flowName, filename, collectionUid, itemUid } = params;
+
+  return new Promise((resolve, reject) => {
+    const state = getState();
+    const collection = findCollectionByUid(state.collections.collections, collectionUid);
+    if (!collection) {
+      return reject(new Error('Collection not found'));
+    }
+
+    const item = {
+      uid: uuid(),
+      type: 'flow',
+      name: flowName,
+      filename,
+      flow: {
+        nodes: [
+          {
+            id: 'start-1',
+            type: 'start',
+            position: { x: 100, y: 150 },
+            data: { initialVars: {} }
+          }
+        ],
+        edges: [],
+        viewport: { x: 0, y: 0, zoom: 1 },
+        config: { stopOnError: true }
+      },
+      settings: {}
+    };
+
+    const resolvedFilename = resolveRequestFilename(filename, collection.format);
+
+    const selectedItem = itemUid ? findItemInCollection(collection, itemUid) : null;
+    let parent = collection;
+    if (selectedItem) {
+      parent = isItemAFolder(selectedItem)
+        ? selectedItem
+        : (findParentItemInCollection(collection, selectedItem.uid) || collection);
+    }
+    const parentPath = parent.pathname;
+    const siblings = parent.items || [];
+
+    const orderableSiblings = filter(
+      siblings,
+      (i) => isItemAFolder(i) || isItemARequest(i) || i.type === 'app' || i.type === 'flow'
+    );
+    item.seq = orderableSiblings.length + 1;
+
+    const fullName = path.join(parentPath, resolvedFilename);
+    const { ipcRenderer } = window;
+
+    ipcRenderer
+      .invoke('renderer:new-request', fullName, item)
+      .then((result) => {
+        dispatch(
+          insertTaskIntoQueue({
+            uid: uuid(),
+            type: 'OPEN_REQUEST',
+            collectionUid,
+            itemPathname: result?.pathname || fullName
+          })
+        );
+        resolve();
+      })
+      .catch(reject);
+  });
+};
+
+export const runFlow = (flowItem, collectionUid) => (dispatch, getState) => {
+  const state = getState();
+  const collection = findCollectionByUid(state.collections.collections, collectionUid);
+
+  return new Promise((resolve, reject) => {
+    if (!collection) {
+      return reject(new Error('Collection not found'));
+    }
+
+    const collectionCopy = cloneDeep(collection);
+    const environment = resolveEnvironmentInheritance({
+      environments: collectionCopy.environments,
+      targetEnvironment: findEnvironmentInCollection(collectionCopy, collectionCopy.activeEnvironmentUid)
+    });
+
+    const cancelTokenUid = uuid();
+    const itemToRun = flowItem.draft ? flowItem.draft : flowItem;
+
+    const { ipcRenderer } = window;
+    ipcRenderer
+      .invoke('renderer:run-flow', itemToRun, collectionCopy, environment, cancelTokenUid)
+      .then(resolve)
+      .catch((err) => {
+        toast.error(err?.message || 'Flow execution failed');
+        reject(err);
+      });
+  });
+};
+
 export const loadGrpcMethodsFromReflection = (item, collectionUid, url) => async (dispatch, getState) => {
   const state = getState();
   const collection = findCollectionByUid(state.collections.collections, collectionUid);

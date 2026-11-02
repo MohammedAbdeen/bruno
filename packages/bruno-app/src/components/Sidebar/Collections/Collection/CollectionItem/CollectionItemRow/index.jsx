@@ -19,6 +19,7 @@ import {
   IconInfoCircle,
   IconTerminal2,
   IconAppWindow,
+  IconRoute,
   IconEyeOff
 } from '@tabler/icons';
 import { useSelector, useDispatch, useStore } from 'react-redux';
@@ -32,6 +33,7 @@ import { copyRequest, setFocusedSidebarPath, insertTaskIntoQueue } from 'provide
 import NewRequest from 'components/Sidebar/NewRequest';
 import NewFolder from 'components/Sidebar/NewFolder';
 import NewApp from 'components/Sidebar/NewApp';
+import NewFlow from 'components/Sidebar/NewFlow';
 import RenameCollectionItem from '../RenameCollectionItem';
 import DeleteCollectionItems from '../DeleteCollectionItems';
 import IgnoreCollectionItem from '../IgnoreCollectionItem';
@@ -125,6 +127,7 @@ const CollectionItemRow = ({
   const [newRequestModalOpen, setNewRequestModalOpen] = useState(false);
   const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
   const [newAppModalOpen, setNewAppModalOpen] = useState(false);
+  const [newFlowModalOpen, setNewFlowModalOpen] = useState(false);
   const [runCollectionModalOpen, setRunCollectionModalOpen] = useState(false);
   const [itemInfoModalOpen, setItemInfoModalOpen] = useState(false);
   const examplesExpanded = !isCollectionItemCollapsed(item);
@@ -434,6 +437,12 @@ const CollectionItemRow = ({
           onClick: () => setNewAppModalOpen(true)
         },
         {
+          id: 'new-flow',
+          leftSection: IconRoute,
+          label: 'New Flow',
+          onClick: () => setNewFlowModalOpen(true)
+        },
+        {
           id: 'run',
           leftSection: IconPlayerPlay,
           label: 'Run',
@@ -732,6 +741,9 @@ const CollectionItemRow = ({
       )}
       {newAppModalOpen && (
         <NewApp item={item} collectionUid={collectionUid} onClose={() => setNewAppModalOpen(false)} />
+      )}
+      {newFlowModalOpen && (
+        <NewFlow item={item} collectionUid={collectionUid} onClose={() => setNewFlowModalOpen(false)} />
       )}
       {runCollectionModalOpen && (
         <RunCollectionItem collectionUid={collectionUid} item={item} onClose={() => setRunCollectionModalOpen(false)} />

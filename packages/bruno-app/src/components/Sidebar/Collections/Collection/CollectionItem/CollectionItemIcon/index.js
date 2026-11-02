@@ -1,5 +1,5 @@
 import RequestMethod from '../RequestMethod';
-import { IconLoader2, IconAlertTriangle, IconAlertCircle, IconAppWindow } from '@tabler/icons';
+import { IconLoader2, IconAlertTriangle, IconAlertCircle, IconAppWindow, IconRoute } from '@tabler/icons';
 import StyledWrapper from './StyledWrapper';
 
 const CollectionItemIcon = ({ item }) => {
@@ -17,6 +17,10 @@ const CollectionItemIcon = ({ item }) => {
 
   if (item?.type === 'app') {
     return <IconAppWindow className="w-fit mr-2" size={16} strokeWidth={1.5} />;
+  }
+
+  if (item?.type === 'flow') {
+    return <IconRoute className="w-fit mr-2 text-indigo-500" size={16} strokeWidth={1.5} />;
   }
 
   return <RequestMethod item={item} />;

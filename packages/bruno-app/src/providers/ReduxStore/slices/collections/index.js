@@ -3758,6 +3758,18 @@ export const collectionsSlice = createSlice({
         item.draft.app.code = action.payload.code;
       }
     },
+    updateFlowData: (state, action) => {
+      const collection = findCollectionByUid(state.collections, action.payload.collectionUid);
+      if (!collection) return;
+
+      const item = findItemInCollection(collection, action.payload.itemUid);
+      if (item && item.type === 'flow') {
+        if (!item.draft) {
+          item.draft = cloneDeep(item);
+        }
+        item.draft.flow = action.payload.flow;
+      }
+    },
     toggleAppMode: (state, action) => {
       const collection = findCollectionByUid(state.collections, action.payload.collectionUid);
       if (!collection) return;
@@ -4469,6 +4481,7 @@ export const {
   toggleCollectionFileMode,
   updateFileContent,
   updateAppCode,
+  updateFlowData,
   toggleAppMode,
   appSetRuntimeVariable,
   moveCollection,

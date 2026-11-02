@@ -45,6 +45,7 @@ const actionsToIntercept = [
   'collections/moveVar',
   'collections/updateRequestDocs',
   'collections/updateAppCode',
+  'collections/updateFlowData',
   'collections/runRequestEvent', // TODO: This doesn't necessarily related to a draft state, need to rethink.
 
   // Folder-level actions

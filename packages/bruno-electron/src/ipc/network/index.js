@@ -32,7 +32,8 @@ const { uuid, safeStringifyJSON, safeParseJSON, parseDataFromResponse, parseData
 const { chooseFileToSave, writeFile, getCollectionFormat, hasRequestExtension } = require('../../utils/filesystem');
 const { addCookieToJar, getDomainsWithCookies, getCookieStringForUrl } = require('../../utils/cookies');
 const { createFormData } = require('../../utils/form-data');
-const { findItemInCollectionByPathname, sortFolder, getAllRequestsInFolderRecursively, getEnvVars, getTreePathFromCollectionToItem, getEffectiveTagsByUid, mergeVars, sortByNameThenSequence } = require('../../utils/collection');
+const { findItemInCollection, findItemInCollectionByPathname, sortFolder, getAllRequestsInFolderRecursively, getEnvVars, getTreePathFromCollectionToItem, getEffectiveTagsByUid, mergeVars, sortByNameThenSequence } = require('../../utils/collection');
+const FlowExecutionEngine = require('../../services/flow-runner/flow-execution-engine');
 const { getOAuth2TokenUsingAuthorizationCode, getOAuth2TokenUsingClientCredentials, getOAuth2TokenUsingPasswordCredentials, getOAuth2TokenUsingImplicitGrant, updateCollectionOauth2Credentials, clearOauth2CredentialsByCredentialsId } = require('../../utils/oauth2');
 const { preferencesUtil } = require('../../store/preferences');
 const { getProcessEnvVars } = require('../../store/process-env');
@@ -2205,6 +2206,78 @@ const registerNetworkIpc = (mainWindow) => {
           runCompletionTime: new Date().toISOString(),
           error: error && !error.isCancel ? error : null
         });
+      }
+    }
+  );
+
+  ipcMain.handle(
+    'renderer:run-flow', async (event, flowItem, collection, environment, cancelTokenUid) => {
+      const abortController = new AbortController();
+      saveCancelToken(cancelTokenUid, abortController);
+
+      const envVars = getEnvVars(environment);
+      const processEnvVars = getProcessEnvVars(collection.uid);
+      const runtimeVariables = collection.runtimeVariables || {};
+
+      const engine = new FlowExecutionEngine();
+
+      const onEvent = (type, data) => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        mainWindow.webContents.send('main:flow-event', {
+          flowUid: flowItem.uid,
+          collectionUid: collection.uid,
+          eventType: type,
+          data
+        });
+      };
+
+      try {
+        const result = await engine.run({
+          flowItem,
+          collection,
+          environment,
+          abortSignal: abortController.signal,
+          onEvent,
+          executeRequest: async ({ itemRef, itemUid, context }) => {
+            const format = getCollectionFormat(collection.pathname);
+            let itemPathname = null;
+            if (itemRef) {
+              itemPathname = path.join(collection.pathname, itemRef);
+              if (!hasRequestExtension(itemPathname, format)) {
+                itemPathname = `${itemPathname}.${format}`;
+              }
+            }
+
+            const targetItem = itemPathname
+              ? cloneDeep(findItemInCollectionByPathname(collection, itemPathname))
+              : cloneDeep(findItemInCollection(collection, itemUid));
+
+            if (!targetItem) {
+              throw new Error(`Target request not found: ${itemRef || itemUid}`);
+            }
+
+            const mergedRuntimeVars = {
+              ...runtimeVariables,
+              ...context
+            };
+
+            const res = await runRequest({
+              item: targetItem,
+              collection,
+              envVars,
+              processEnvVars,
+              runtimeVariables: mergedRuntimeVars,
+              runInBackground: true,
+              parentExecutionMode: 'runner'
+            });
+
+            return res;
+          }
+        });
+
+        return result;
+      } finally {
+        deleteCancelToken(cancelTokenUid);
       }
     }
   );

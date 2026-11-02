@@ -49,6 +49,7 @@ const actionsToIntercept = [
   'collections/moveVar',
   'collections/updateRequestDocs',
   'collections/updateAppCode',
+  'collections/updateFlowData',
   'collections/runRequestEvent',
   'collections/updateCollectionPresets',
   'collections/setRequestVars',
