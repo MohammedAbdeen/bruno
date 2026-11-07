@@ -619,13 +619,54 @@ const folderRootSchema = Yup.object({
   .noUnknown(true)
   .nullable();
 
+const flowNodeSchema = Yup.object({
+  id: Yup.string().required('node id is required'),
+  type: Yup.string().oneOf(['start', 'request', 'condition', 'delay', 'script', 'end', 'for-each', 'while', 'sub-flow', 'assert', 'data-source']).required('node type is required'),
+  position: Yup.object({
+    x: Yup.number().default(0),
+    y: Yup.number().default(0)
+  }).nullable(),
+  data: Yup.object().nullable().default({})
+}).noUnknown(false);
+
+const flowEdgeSchema = Yup.object({
+  id: Yup.string().required('edge id is required'),
+  source: Yup.string().required('source is required'),
+  target: Yup.string().required('target is required'),
+  sourceHandle: Yup.string().nullable(),
+  targetHandle: Yup.string().nullable(),
+  label: Yup.string().nullable()
+}).noUnknown(false);
+
+const flowSchema = Yup.object({
+  nodes: Yup.array().of(flowNodeSchema).default([]),
+  edges: Yup.array().of(flowEdgeSchema).default([]),
+  viewport: Yup.object({
+    x: Yup.number().default(0),
+    y: Yup.number().default(0),
+    zoom: Yup.number().default(1)
+  }).nullable(),
+  config: Yup.object().nullable().default({})
+}).noUnknown(true).nullable();
+
 const itemSchema = Yup.object({
   uid: uidSchema,
-  type: Yup.string().oneOf(['http-request', 'graphql-request', 'folder', 'js', 'app', 'grpc-request', 'ws-request']).required('type is required'),
+  type: Yup.string().oneOf(['http-request', 'graphql-request', 'folder', 'js', 'app', 'grpc-request', 'ws-request', 'flow']).required('type is required'),
   seq: Yup.number().min(1),
   name: Yup.string().min(1, 'name must be at least 1 character').required('name is required'),
   tags: Yup.array().of(Yup.string().min(1, 'tag must not be empty')),
   description: Yup.string().nullable(),
+  flow: Yup.mixed().when('type', (type) => {
+    if (type === 'flow') {
+      return Yup.lazy((flowValue) => {
+        if (flowValue == null) {
+          return Yup.mixed().required('flow is required when item-type is flow');
+        }
+        return flowSchema;
+      });
+    }
+    return Yup.mixed().nullable().notRequired();
+  }),
   request: Yup.mixed().when('type', (type) => {
     if (type === 'grpc-request') {
       return grpcRequestSchema.required('request is required when item-type is grpc-request');
@@ -714,5 +755,8 @@ module.exports = {
   environmentSchema,
   environmentsSchema,
   collectionSchema,
-  annotationSchema
+  annotationSchema,
+  flowSchema,
+  flowNodeSchema,
+  flowEdgeSchema
 };

@@ -12,6 +12,9 @@ class ErrorBoundary extends React.Component {
   componentDidMount() {
     // Add a global error event listener to capture client-side errors
     window.onerror = (message, source, lineno, colno, error) => {
+      // ResizeObserver defers remaining notifications to the next frame. This
+      // browser layout notification has no exception and must not close the app.
+      if (!error && ['ResizeObserver loop completed with undelivered notifications.', 'ResizeObserver loop limit exceeded'].includes(message)) return;
       this.setState({ hasError: true, error });
     };
   }

@@ -114,3 +114,10 @@ describe('buildTree — uid hydration', () => {
     expect(second.request.body.ws[0].uid).not.toEqual(first.request.body.ws[0].uid);
   });
 });
+
+it('preserves a saved flow graph when building the collection tree', () => {
+  const flow = { nodes: [{ id: 'start', type: 'start' }], edges: [], config: { stopOnError: true } };
+  const item = buildSingleRequest('workflow.flow.bru', { name: 'Workflow', type: 'flow', flow });
+  expect(item.type).toBe('flow');
+  expect(item.flow).toEqual(flow);
+});

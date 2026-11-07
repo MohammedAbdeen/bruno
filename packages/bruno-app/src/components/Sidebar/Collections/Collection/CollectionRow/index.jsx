@@ -22,11 +22,12 @@ import {
   IconBook,
   IconServer,
   IconFileArrowRight,
-  IconAppWindow
+  IconAppWindow,
+  IconRoute
 } from '@tabler/icons';
 import OpenAPISyncIcon from 'components/Icons/OpenAPISync';
 import { toggleCollection, collapseFullCollection, clearSidebarSelection } from 'providers/ReduxStore/slices/collections';
-import { mountCollection, moveCollectionAndPersist, handleMultipleCollectionItemsDrop, pasteItem, showInFolder, saveCollectionSecurityConfig } from 'providers/ReduxStore/slices/collections/actions';
+import { importFlowFromJson, mountCollection, moveCollectionAndPersist, handleMultipleCollectionItemsDrop, pasteItem, showInFolder, saveCollectionSecurityConfig } from 'providers/ReduxStore/slices/collections/actions';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { addTab, makeTabPermanent } from 'providers/ReduxStore/slices/tabs';
 import { setFocusedSidebarPath } from 'providers/ReduxStore/slices/app';
@@ -34,6 +35,7 @@ import toast from 'react-hot-toast';
 import NewRequest from 'components/Sidebar/NewRequest';
 import NewFolder from 'components/Sidebar/NewFolder';
 import NewApp from 'components/Sidebar/NewApp';
+import NewFlow from 'components/Sidebar/NewFlow';
 import RemoveCollections from '../RemoveCollections';
 import MoveToWorkspace from '../MoveToWorkspace';
 import { isPathExternalToBasePath } from 'utils/common/path';
@@ -66,6 +68,7 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewRequestModal, setShowNewRequestModal] = useState(false);
   const [showNewAppModal, setShowNewAppModal] = useState(false);
+  const [showNewFlowModal, setShowNewFlowModal] = useState(false);
   const [showRenameCollectionModal, setShowRenameCollectionModal] = useState(false);
   const [showCloneCollectionModalOpen, setShowCloneCollectionModalOpen] = useState(false);
   const [showShareCollectionModal, setShowShareCollectionModal] = useState(false);
@@ -413,6 +416,24 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       }
     },
     {
+      id: 'new-flow',
+      leftSection: IconRoute,
+      label: 'New Flow',
+      onClick: () => {
+        ensureCollectionIsMounted();
+        setShowNewFlowModal(true);
+      }
+    },
+    {
+      id: 'import-flow-json',
+      leftSection: IconRoute,
+      label: 'Import Flow (JSON)',
+      onClick: () => {
+        ensureCollectionIsMounted();
+        dispatch(importFlowFromJson(collection.uid));
+      }
+    },
+    {
       id: 'run',
       leftSection: IconPlayerPlay,
       label: 'Run',
@@ -548,6 +569,7 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       {showNewRequestModal && <NewRequest collectionUid={collection.uid} onClose={() => setShowNewRequestModal(false)} />}
       {showNewFolderModal && <NewFolder collectionUid={collection.uid} onClose={() => setShowNewFolderModal(false)} />}
       {showNewAppModal && <NewApp collectionUid={collection.uid} onClose={() => setShowNewAppModal(false)} />}
+      {showNewFlowModal && <NewFlow collectionUid={collection.uid} onClose={() => setShowNewFlowModal(false)} />}
       {showRenameCollectionModal && (
         <RenameCollection collectionUid={collection.uid} onClose={() => setShowRenameCollectionModal(false)} />
       )}

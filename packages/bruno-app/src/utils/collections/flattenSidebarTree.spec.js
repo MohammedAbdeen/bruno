@@ -241,3 +241,10 @@ describe('row index maps', () => {
     expect(rows[rowIndexByItemUid.get('ex1')].kind).toBe('example');
   });
 });
+
+it('includes saved flows in sidebar rows and the item index', () => {
+  const flow = { uid: 'flow', type: 'flow', name: 'Workflow', seq: 1, flow: { nodes: [], edges: [] } };
+  const result = flattenSidebarTree([loaded(collection('Flows', [flow]))]);
+  expect(result.rows.some((row) => row.itemUid === 'flow')).toBe(true);
+  expect(result.itemsByUid.get('flow')).toEqual(flow);
+});

@@ -1948,6 +1948,117 @@ export const newApp = (params) => (dispatch, getState) => {
   });
 };
 
+export const newFlow = (params) => (dispatch, getState) => {
+  const { flowName, filename, collectionUid, itemUid, initialFlow } = params;
+
+  return new Promise((resolve, reject) => {
+    const state = getState();
+    const collection = findCollectionByUid(state.collections.collections, collectionUid);
+    if (!collection) {
+      return reject(new Error('Collection not found'));
+    }
+
+    const item = {
+      uid: uuid(),
+      type: 'flow',
+      name: flowName,
+      filename,
+      flow: initialFlow || {
+        nodes: [
+          {
+            id: 'start-1',
+            type: 'start',
+            position: { x: 100, y: 150 },
+            data: { initialVars: {} }
+          }
+        ],
+        edges: [],
+        viewport: { x: 0, y: 0, zoom: 1 },
+        config: { stopOnError: true }
+      },
+      settings: {}
+    };
+
+    const resolvedFilename = resolveRequestFilename(filename, collection.format);
+
+    const selectedItem = itemUid ? findItemInCollection(collection, itemUid) : null;
+    let parent = collection;
+    if (selectedItem) {
+      parent = isItemAFolder(selectedItem)
+        ? selectedItem
+        : (findParentItemInCollection(collection, selectedItem.uid) || collection);
+    }
+    const parentPath = parent.pathname;
+    const siblings = parent.items || [];
+
+    const orderableSiblings = filter(
+      siblings,
+      (i) => isItemAFolder(i) || isItemARequest(i) || i.type === 'app' || i.type === 'flow'
+    );
+    item.seq = orderableSiblings.length + 1;
+
+    const fullName = path.join(parentPath, resolvedFilename);
+    const { ipcRenderer } = window;
+
+    ipcRenderer
+      .invoke('renderer:new-request', fullName, item)
+      .then((result) => {
+        dispatch(
+          insertTaskIntoQueue({
+            uid: uuid(),
+            type: 'OPEN_REQUEST',
+            collectionUid,
+            itemPathname: result?.pathname || fullName
+          })
+        );
+        resolve();
+      })
+      .catch(reject);
+  });
+};
+
+export const importFlowFromJson = (collectionUid, itemUid = null) => async (dispatch, getState) => {
+  const collection = findCollectionByUid(getState().collections.collections, collectionUid);
+  if (!collection) throw new Error('Collection not found');
+  try {
+    const imported = await window.ipcRenderer.invoke('renderer:import-flow-json', { collectionPath: collection.pathname });
+    if (imported.canceled) return;
+    await dispatch(newFlow({ collectionUid, itemUid, flowName: imported.name,
+      filename: sanitizeName(imported.name), initialFlow: imported.flow }));
+    toast.success('Flow imported from JSON');
+  } catch (error) {
+    toast.error(error.message || 'Could not import flow JSON');
+  }
+};
+
+export const runFlow = (flowItem, collectionUid, cancelTokenUid = uuid(), options = {}) => (dispatch, getState) => {
+  const state = getState();
+  const collection = findCollectionByUid(state.collections.collections, collectionUid);
+
+  return new Promise((resolve, reject) => {
+    if (!collection) {
+      return reject(new Error('Collection not found'));
+    }
+
+    const collectionCopy = cloneDeep(collection);
+    const environment = resolveEnvironmentInheritance({
+      environments: collectionCopy.environments,
+      targetEnvironment: findEnvironmentInCollection(collectionCopy, collectionCopy.activeEnvironmentUid)
+    });
+
+    const itemToRun = { ...flowItem, ...flowItem.draft };
+
+    const { ipcRenderer } = window;
+    ipcRenderer
+      .invoke('renderer:run-flow', itemToRun, collectionCopy, environment, cancelTokenUid, options)
+      .then(resolve)
+      .catch((err) => {
+        toast.error(err?.message || 'Flow execution failed');
+        reject(err);
+      });
+  });
+};
+
 export const loadGrpcMethodsFromReflection = (item, collectionUid, url) => async (dispatch, getState) => {
   const state = getState();
   const collection = findCollectionByUid(state.collections.collections, collectionUid);

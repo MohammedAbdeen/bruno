@@ -13,7 +13,7 @@ const stripLastLine = (text) => {
 };
 
 const jsonToBru = (json) => {
-  const { meta, http, grpc, ws, params, headers, metadata, auth, body, script, tests, vars, assertions, settings, app, docs, examples } = json;
+  const { meta, http, grpc, ws, params, headers, metadata, auth, body, script, tests, vars, assertions, settings, app, docs, examples, flow } = json;
 
   let bru = '';
 
@@ -810,6 +810,18 @@ ${indentString(tests)}
     if (app.code && app.code.length) {
       bru += `  code: '''\n${indentString(app.code, 2)}\n  '''\n`;
     }
+    bru += '}\n\n';
+  }
+
+  if (flow && (flow.nodes?.length || flow.edges?.length || flow.viewport || Object.keys(flow).length)) {
+    bru += `flow {\n`;
+    const flowPayload = {
+      nodes: flow.nodes || [],
+      edges: flow.edges || [],
+      viewport: flow.viewport || { x: 0, y: 0, zoom: 1 },
+      config: flow.config || {}
+    };
+    bru += `  data: '''\n${indentString(JSON.stringify(flowPayload, null, 2), 2)}\n  '''\n`;
     bru += '}\n\n';
   }
 

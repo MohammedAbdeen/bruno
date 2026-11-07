@@ -720,6 +720,19 @@ export const transformRequestToSaveToFilesystem = (item) => {
     };
   }
 
+  // Flow items have no request, emit flow data
+  if (_item.type === 'flow') {
+    return {
+      uid: _item.uid,
+      type: 'flow',
+      name: _item.name,
+      seq: _item.seq,
+      tags: _item.tags,
+      settings: _item.settings,
+      flow: _item.flow || { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 }, config: {} }
+    };
+  }
+
   // Transform examples to ensure status is a number
   const transformExamples = (examples = []) => {
     return map(examples, (example) => ({
@@ -925,9 +938,16 @@ export const isItemAFolder = (item) => {
   return !item.hasOwnProperty('request') && item.type === 'folder';
 };
 
+export const isItemAFlow = (item) => {
+  return item && item.type === 'flow';
+};
+
 export const getItemTypeLabel = (item) => {
   if (isItemAFolder(item)) {
     return 'Folder';
+  }
+  if (item?.type === 'flow') {
+    return 'Flow';
   }
   return item?.type === 'app' ? 'App' : 'Request';
 };
@@ -970,7 +990,7 @@ export const countInvalidItems = (items = []) => {
 export const sortItemsBySidebarOrder = (items = []) => {
   const folderItems = sortByNameThenSequence(filter(items, (i) => isItemAFolder(i) && !i.isTransient));
   const appItems = filter(items, (i) => i.type === 'app' && !i.isTransient).sort((a, b) => a.seq - b.seq);
-  const requestItems = filter(items, (i) => isItemARequest(i) && !i.isTransient).sort((a, b) => a.seq - b.seq);
+  const requestItems = filter(items, (i) => (isItemARequest(i) || i.type === 'flow') && !i.isTransient).sort((a, b) => a.seq - b.seq);
 
   return [...folderItems, ...appItems, ...requestItems].map((item) =>
     Array.isArray(item.items) ? { ...item, items: sortItemsBySidebarOrder(item.items) } : item
@@ -2197,7 +2217,7 @@ export const getVisibleSidebarUidsInOrder = ({ sidebarEntries = [], searchText =
   const visitItems = (items = []) => {
     const folderItems = sortByNameThenSequence(filter(items, (i) => isItemAFolder(i) && !i.isTransient));
     const appItems = [...filter(items, (i) => i.type === 'app' && !i.isTransient)].sort((a, b) => a.seq - b.seq);
-    const requestItems = [...filter(items, (i) => isItemARequest(i) && !i.isTransient)].sort((a, b) => a.seq - b.seq);
+    const requestItems = [...filter(items, (i) => (isItemARequest(i) || i.type === 'flow') && !i.isTransient)].sort((a, b) => a.seq - b.seq);
 
     folderItems.forEach((folder) => {
       if (hasSearchText && !doesFolderHaveItemsMatchSearchText(folder, searchText)) return;

@@ -60,6 +60,7 @@ You can explore our [paid versions](https://www.usebruno.com/pricing) to see if 
 - [Bruno CLI](#bruno-cli)
 - [Run with Docker](#run-with-docker)
 - [Features](#features)
+  - [Visual API Flows](#visual-api-flows)
   - [Run across multiple platforms 🖥️](#run-across-multiple-platforms-%EF%B8%8F)
   - [Collaborate via Git 👩‍💻🧑‍💻](#collaborate-via-git-%E2%80%8D%E2%80%8D)
 - [Important Links 📌](#important-links-)
@@ -154,6 +155,32 @@ docker run -v $(pwd):/bruno usebruno/cli run
 For variants, tag matrix, environment files, and CI examples (GitHub Actions, GitLab CI, Jenkins), see the full [Bruno CLI Docker documentation](https://docs.usebruno.com/bru-cli/docker).
 
 ## Features
+
+### Visual API Flows
+
+Build and debug API workflows on a visual canvas. Flow support is implemented in this source tree; use the desktop app and CLI from this checkout to try it.
+
+- Connect saved requests with scripts, conditions, delays, assertions, loops, datasets, and sub-flows.
+- Save flows in Bru or YAML collections, and import/export definitions as JSON for sharing through Git.
+- Use `ctx`/`res` autocomplete, quick assertion snippets, node duplication (**Ctrl+D / Cmd+D** or right-click), and **Beautify Graph** with Dagre.
+- Inspect each node's input/output, compare loop iterations, and **Copy as cURL** from captured request executions.
+- Validate the graph before running, or debug with breakpoints, **Step Next**, **Continue**, and editable paused context.
+- Reuse a saved request with per-node header, query-parameter, and JSON-object body overrides.
+
+To create a flow, right-click a collection or folder and choose **New Flow**. Select **Blank Flow**, **OAuth2 Login & Fetch**, **Async Job Polling Loop**, or **Data-Driven Batch Run**. Choose the saved requests required by the template, adapt its variables and assertions to your API, then save and select **Run Flow**.
+
+For a ready-to-import example, choose **Import Flow (JSON)** from the collection/folder menu and select [sum-flow.json](examples/flows/sum-flow.json). It adds three numbers in a loop and verifies that the total is 60. Existing flows also offer **Import JSON** and **Export JSON** in their toolbar.
+
+Run a flow from the collection directory using this checkout's CLI:
+
+```sh
+node /path/to/bruno/packages/bruno-cli/bin/bru.js run \
+  --flow flows/e2e.flow.bru --env staging --env-var buildId=9421
+```
+
+The resolved environment and CLI `--env-var` values are available directly in `ctx`, including before the first request. JSON and JUnit flow reports are supported. Body overrides shallow-merge JSON objects; binary and multipart request captures cannot be reconstructed by Copy as cURL. Templates require API-specific mappings, and interactive debugging is available in the desktop app.
+
+See [flow authoring and request overrides](docs/flows-phase7.md), [node input/output inspection](docs/flows-node-inspection.md), [JSON interchange](docs/flows-json.md), and [CLI flow execution](docs/flows-cli.md). The [implementation plan](FLOWS_PLAN.md) and [desktop validation notes](docs/flows-desktop-validation.md) track completed work and test coverage.
 
 ### Run across multiple platforms 🖥️
 

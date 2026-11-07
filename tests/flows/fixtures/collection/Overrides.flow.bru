@@ -1,0 +1,81 @@
+meta {
+  name: Overrides
+  type: flow
+  seq: 9
+}
+
+flow {
+  data: '''
+    {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 0,
+            "y": 100
+          },
+          "data": {
+            "initialVars": {
+              "buildId": "9421"
+            }
+          }
+        },
+        {
+          "id": "request",
+          "type": "request",
+          "position": {
+            "x": 320,
+            "y": 100
+          },
+          "data": {
+            "itemRef": "Echo.bru"
+          }
+        },
+        {
+          "id": "assert",
+          "type": "assert",
+          "position": {
+            "x": 640,
+            "y": 100
+          },
+          "data": {
+            "expression": "res.status === 200 && res.body.query.trace === \"9421\" && res.body.headers[\"x-flow\"] === \"captured\" && JSON.parse(res.body.body).id === \"9421\" && JSON.parse(res.body.body).keep === true"
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 960,
+            "y": 100
+          },
+          "data": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-0",
+          "source": "start",
+          "target": "request"
+        },
+        {
+          "id": "edge-1",
+          "source": "request",
+          "target": "assert"
+        },
+        {
+          "id": "edge-2",
+          "source": "assert",
+          "target": "end"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      },
+      "config": {}
+    }
+  '''
+}

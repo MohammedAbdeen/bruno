@@ -131,6 +131,7 @@ const buildRequestNode = (absolutePath, basename, entry, uidOverrides, uidFor) =
     settings: data.settings,
     examples: data.examples,
     app: data.app ?? null,
+    flow: data.flow ?? null,
     raw: entry.raw ?? null,
     size: sizeInMB(entry.raw ? Buffer.byteLength(entry.raw, 'utf8') : 0),
     filename: basename,

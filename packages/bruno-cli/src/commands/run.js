@@ -1,3 +1,4 @@
+const { collectionWithFlowRequest } = require('@usebruno/js/src/flow/request-overrides');
 const fs = require('fs');
 const chalk = require('chalk');
 const path = require('path');
@@ -18,6 +19,7 @@ const { createSkippedFileResults } = require('../utils/run');
 const { sanitizeResultsForReporter } = require('../utils/sanitize-results');
 const { getSystemProxy } = require('@usebruno/requests');
 const { loadEnvironmentFromFile } = require('../utils/environment');
+const { runFlowCli } = require('../runner/run-flow');
 const command = 'run [paths...]';
 const desc = 'Run one or more requests/folders';
 
@@ -87,6 +89,11 @@ const getJsSandboxRuntime = (sandbox) => {
 
 const builder = async (yargs) => {
   yargs
+    .option('flow', {
+      type: 'string',
+      description: 'Run a visual flow file relative to the collection root'
+    })
+    .example('$0 run --flow flows/login.flow.bru --reporter-json results.json --reporter-junit results.xml', 'Run a flow and write CI reports')
     .option('r', {
       describe: 'Indicates a recursive run',
       type: 'boolean',
@@ -339,6 +346,9 @@ const handler = async function (argv) {
       excludeTags,
       verbose
     } = argv;
+    if (argv.flow && (paths?.length || testsOnly || includeTags || excludeTags || recursive)) {
+      throw new Error('--flow cannot be combined with request paths, --tests-only, tags, or -r');
+    }
     const collectionPath = process.cwd();
 
     const collection = createCollectionJsonFromPathname(collectionPath);
@@ -702,7 +712,7 @@ const handler = async function (argv) {
       }
     }
 
-    requestItems = getCallStack(resolvedPaths, collection, { recursive });
+    requestItems = argv.flow ? [] : getCallStack(resolvedPaths, collection, { recursive }).filter((item) => item.type !== 'flow');
 
     if (testsOnly) {
       requestItems = requestItems.filter((item) => {
@@ -824,6 +834,41 @@ const handler = async function (argv) {
         reject(`bru.runRequest: invalid request path - ${itemPathname}`);
       });
     };
+
+    if (argv.flow) {
+      const result = await runFlowCli({
+        flowPath: argv.flow,
+        initialContext: { ...envVars, ...runtimeVariables },
+        bail,
+        collection,
+        formats,
+        reporterOptions: {
+          skipAllHeaders: reporterSkipAllHeaders,
+          skipHeaders: reporterSkipHeaders,
+          skipRequestBody: reporterSkipRequestBody || reporterSkipBody,
+          skipResponseBody: reporterSkipResponseBody || reporterSkipBody
+        },
+        executeItem: async (requestItem, context, signal) => {
+          for (const key of Object.keys(runtimeVariables)) delete runtimeVariables[key];
+          Object.assign(runtimeVariables, context);
+          const abort = () => runAbortController.abort();
+          signal.addEventListener('abort', abort, { once: true });
+          try {
+            const result = await runSingleRequest(
+              requestItem, collectionPath, runtimeVariables, envVars, processEnvVars,
+              brunoConfig, collectionRoot, runtime, collectionWithFlowRequest(collection, requestItem), runSingleRequestByPathname,
+              globalEnvVars, persistPaths, signal
+            );
+            return { ...result, updatedVariables: cloneDeep(runtimeVariables) };
+          } finally {
+            signal.removeEventListener('abort', abort);
+          }
+        }
+      });
+      process.exitCode = result.status === 'cancelled' ? 130
+        : result.status === 'success' ? 0 : constants.EXIT_STATUS.ERROR_FAILED_COLLECTION;
+      return;
+    }
 
     let currentRequestIndex = 0;
     let nJumps = 0; // count the number of jumps to avoid infinite loops

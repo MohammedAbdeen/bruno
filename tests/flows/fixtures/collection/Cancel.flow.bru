@@ -1,0 +1,61 @@
+meta {
+  name: Cancel
+  type: flow
+  seq: 2
+}
+
+flow {
+  data: '''
+    {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 0,
+            "y": 100
+          },
+          "data": {}
+        },
+        {
+          "id": "delay",
+          "type": "delay",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "data": {
+            "durationMs": 30000
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "data": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "start",
+          "target": "delay"
+        },
+        {
+          "id": "e2",
+          "source": "delay",
+          "target": "end"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      },
+      "config": {}
+    }
+  '''
+}

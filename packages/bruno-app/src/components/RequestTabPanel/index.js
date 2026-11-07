@@ -47,6 +47,7 @@ import ApiSpecTab from 'components/ApiSpecTab';
 import MockServerDashboard from 'components/MockServer/MockServerDashboard';
 import MockResponse from 'components/MockServer/MockResponse';
 import ChangelogTab from 'components/ChangelogTab';
+import FlowTabPanel from 'components/FlowTabPanel';
 import { resolveMockServerInstance } from 'utils/mock-server/mock-server-instances';
 import CollapsedPanelIndicator from './CollapsedPanelIndicator';
 import { clampRequestHeightForResponse } from './paneSize';
@@ -635,6 +636,10 @@ const RequestTabPanel = () => {
     && focusedTab.appPreview !== false;
   if (item.type === 'app' || appEnabled) {
     return <StyledWrapper className="flex flex-col flex-grow relative overflow-hidden" data-testid="app-tab-placeholder" />;
+  }
+
+  if (item.type === 'flow') {
+    return <FlowTabPanel item={item} collection={collection} />;
   }
 
   const renderQueryUrl = () => {

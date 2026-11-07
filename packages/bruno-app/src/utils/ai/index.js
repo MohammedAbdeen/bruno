@@ -35,6 +35,9 @@ export const testAiProvider = ({ providerId }) =>
 export const aiGenerateText = (params) =>
   callIpc('renderer:ai-generate-text', params);
 
+export const aiGenerateFlow = (params) =>
+  callIpc('renderer:ai-generate-flow', params);
+
 export const aiGenerateScript = (params) =>
   callIpc('renderer:ai-generate-script', params);
 

@@ -10,7 +10,55 @@ export type ItemType
     | 'js'
     | 'app'
     | 'grpc-request'
-    | 'ws-request';
+    | 'ws-request'
+    | 'flow';
+
+export type FlowNodeType
+  = | 'start'
+    | 'request'
+    | 'condition'
+    | 'delay'
+    | 'script'
+    | 'end'
+    | 'for-each'
+    | 'while'
+    | 'sub-flow'
+    | 'assert'
+    | 'data-source';
+
+export interface FlowNodePosition {
+  x: number;
+  y: number;
+}
+
+export interface FlowNode {
+  id: string;
+  type: FlowNodeType;
+  position?: FlowNodePosition | null;
+  data?: Record<string, any> | null;
+}
+
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
+  label?: string | null;
+}
+
+export interface FlowViewport {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+export interface Flow {
+  nodes?: FlowNode[];
+  edges?: FlowEdge[];
+  viewport?: FlowViewport | null;
+  config?: Record<string, any> | null;
+}
 
 export interface HttpItemSettings {
   encodeUrl?: boolean | null;
@@ -43,6 +91,7 @@ export interface Item {
   description?: string | null;
   tags?: string[] | null;
   request?: Request | null;
+  flow?: Flow | null;
   settings?: ItemSettings;
   app?: App | null;
   fileContent?: string | null;

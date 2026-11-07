@@ -19,11 +19,12 @@ import {
   IconInfoCircle,
   IconTerminal2,
   IconAppWindow,
+  IconRoute,
   IconEyeOff
 } from '@tabler/icons';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 import { addTab, focusTab, makeTabPermanent } from 'providers/ReduxStore/slices/tabs';
-import { handleMultipleCollectionItemsDrop, sendRequest, showInFolder, pasteItem, saveRequest, cloneItem } from 'providers/ReduxStore/slices/collections/actions';
+import { importFlowFromJson, handleMultipleCollectionItemsDrop, sendRequest, showInFolder, pasteItem, saveRequest, cloneItem } from 'providers/ReduxStore/slices/collections/actions';
 import { sanitizeName } from 'utils/common/regex';
 import { formatIpcError } from 'utils/common/error';
 import { toggleCollectionItem, expandItem, collapseItem, addResponseExample } from 'providers/ReduxStore/slices/collections';
@@ -32,6 +33,7 @@ import { copyRequest, setFocusedSidebarPath, insertTaskIntoQueue } from 'provide
 import NewRequest from 'components/Sidebar/NewRequest';
 import NewFolder from 'components/Sidebar/NewFolder';
 import NewApp from 'components/Sidebar/NewApp';
+import NewFlow from 'components/Sidebar/NewFlow';
 import RenameCollectionItem from '../RenameCollectionItem';
 import DeleteCollectionItems from '../DeleteCollectionItems';
 import IgnoreCollectionItem from '../IgnoreCollectionItem';
@@ -125,6 +127,7 @@ const CollectionItemRow = ({
   const [newRequestModalOpen, setNewRequestModalOpen] = useState(false);
   const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
   const [newAppModalOpen, setNewAppModalOpen] = useState(false);
+  const [newFlowModalOpen, setNewFlowModalOpen] = useState(false);
   const [runCollectionModalOpen, setRunCollectionModalOpen] = useState(false);
   const [itemInfoModalOpen, setItemInfoModalOpen] = useState(false);
   const examplesExpanded = !isCollectionItemCollapsed(item);
@@ -326,7 +329,7 @@ const CollectionItemRow = ({
     if (event && event.detail != 1) return;
     const isRequest = isItemARequest(item);
     const isApp = item.type === 'app';
-    if (isRequest || isApp) {
+    if (isRequest || isApp || item.type === 'flow') {
       if (isTabForItemPresent) {
         dispatch(
           focusTab({
@@ -432,6 +435,18 @@ const CollectionItemRow = ({
           leftSection: IconAppWindow,
           label: 'New App',
           onClick: () => setNewAppModalOpen(true)
+        },
+        {
+          id: 'new-flow',
+          leftSection: IconRoute,
+          label: 'New Flow',
+          onClick: () => setNewFlowModalOpen(true)
+        },
+        {
+          id: 'import-flow-json',
+          leftSection: IconRoute,
+          label: 'Import Flow (JSON)',
+          onClick: () => { dispatch(importFlowFromJson(collectionUid, item.uid)); }
         },
         {
           id: 'run',
@@ -732,6 +747,9 @@ const CollectionItemRow = ({
       )}
       {newAppModalOpen && (
         <NewApp item={item} collectionUid={collectionUid} onClose={() => setNewAppModalOpen(false)} />
+      )}
+      {newFlowModalOpen && (
+        <NewFlow item={item} collectionUid={collectionUid} onClose={() => setNewFlowModalOpen(false)} />
       )}
       {runCollectionModalOpen && (
         <RunCollectionItem collectionUid={collectionUid} item={item} onClose={() => setRunCollectionModalOpen(false)} />

@@ -1,0 +1,215 @@
+meta {
+  name: Advanced
+  type: flow
+  seq: 3
+}
+
+flow {
+  data: '''
+    {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "initialVars": {
+              "total": 0,
+              "numbers": [
+                1,
+                2
+              ],
+              "pollCount": 0
+            }
+          }
+        },
+        {
+          "id": "dataset",
+          "type": "data-source",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "fileRef": "dataset.json",
+            "format": "json",
+            "itemVar": "row",
+            "maxIterations": 10
+          }
+        },
+        {
+          "id": "child",
+          "type": "sub-flow",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "flowRef": "Child.flow.bru"
+          }
+        },
+        {
+          "id": "each",
+          "type": "for-each",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "expression": "ctx.numbers",
+            "itemVar": "number",
+            "maxIterations": 10
+          }
+        },
+        {
+          "id": "sum",
+          "type": "script",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "code": "ctx.total += ctx.number;"
+          }
+        },
+        {
+          "id": "poll",
+          "type": "while",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "expression": "ctx.pollCount < 2",
+            "maxIterations": 5
+          }
+        },
+        {
+          "id": "increment",
+          "type": "script",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "code": "ctx.pollCount += 1;"
+          }
+        },
+        {
+          "id": "request",
+          "type": "request",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "itemRef": "Ping.bru",
+            "outputVars": {
+              "statusCode": "res.status"
+            }
+          }
+        },
+        {
+          "id": "assert",
+          "type": "assert",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "expression": "ctx.total === 8 && ctx.pollCount === 2 && ctx.statusCode === 200 && ctx.fromPreScript === 'pre' && ctx.fromPostScript === 'post';",
+            "message": "Advanced flow result mismatch"
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "start-dataset",
+          "source": "start",
+          "target": "dataset"
+        },
+        {
+          "id": "dataset-child",
+          "source": "dataset",
+          "target": "child",
+          "sourceHandle": "body"
+        },
+        {
+          "id": "child-dataset",
+          "source": "child",
+          "target": "dataset"
+        },
+        {
+          "id": "dataset-each",
+          "source": "dataset",
+          "target": "each",
+          "sourceHandle": "done"
+        },
+        {
+          "id": "each-sum",
+          "source": "each",
+          "target": "sum",
+          "sourceHandle": "body"
+        },
+        {
+          "id": "sum-each",
+          "source": "sum",
+          "target": "each"
+        },
+        {
+          "id": "each-poll",
+          "source": "each",
+          "target": "poll",
+          "sourceHandle": "done"
+        },
+        {
+          "id": "poll-increment",
+          "source": "poll",
+          "target": "increment",
+          "sourceHandle": "body"
+        },
+        {
+          "id": "increment-poll",
+          "source": "increment",
+          "target": "poll"
+        },
+        {
+          "id": "poll-request",
+          "source": "poll",
+          "target": "request",
+          "sourceHandle": "done"
+        },
+        {
+          "id": "request-assert",
+          "source": "request",
+          "target": "assert"
+        },
+        {
+          "id": "assert-end",
+          "source": "assert",
+          "target": "end"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      },
+      "config": {
+        "stopOnError": true
+      }
+    }
+  '''
+}

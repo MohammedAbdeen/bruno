@@ -1,3 +1,4 @@
+const { applyRequestOverrides, collectionWithFlowRequest } = require('@usebruno/js/src/flow/request-overrides');
 const https = require('https');
 const axios = require('axios');
 const path = require('path');
@@ -32,7 +33,11 @@ const { uuid, safeStringifyJSON, safeParseJSON, parseDataFromResponse, parseData
 const { chooseFileToSave, writeFile, getCollectionFormat, hasRequestExtension } = require('../../utils/filesystem');
 const { addCookieToJar, getDomainsWithCookies, getCookieStringForUrl } = require('../../utils/cookies');
 const { createFormData } = require('../../utils/form-data');
-const { findItemInCollectionByPathname, sortFolder, getAllRequestsInFolderRecursively, getEnvVars, getTreePathFromCollectionToItem, getEffectiveTagsByUid, mergeVars, sortByNameThenSequence } = require('../../utils/collection');
+const { findItemInCollection, findItemInCollectionByPathname, sortFolder, getAllRequestsInFolderRecursively, getEnvVars, getTreePathFromCollectionToItem, getEffectiveTagsByUid, mergeVars, sortByNameThenSequence } = require('../../utils/collection');
+const { FlowDebugController } = require('@usebruno/js/src/flow/debug-controller');
+const FlowExecutionEngine = require('../../services/flow-runner/flow-execution-engine');
+const { resolveCollectionFile, loadFlowFile } = require('../../services/flow-runner/flow-resources');
+const flowFs = require('node:fs/promises');
 const { getOAuth2TokenUsingAuthorizationCode, getOAuth2TokenUsingClientCredentials, getOAuth2TokenUsingPasswordCredentials, getOAuth2TokenUsingImplicitGrant, updateCollectionOauth2Credentials, clearOauth2CredentialsByCredentialsId } = require('../../utils/oauth2');
 const { preferencesUtil } = require('../../store/preferences');
 const { getProcessEnvVars } = require('../../store/process-env');
@@ -759,7 +764,7 @@ const registerNetworkIpc = (mainWindow) => {
     return scriptResult;
   };
 
-  const runRequest = async ({ item, collection, envVars, processEnvVars, runtimeVariables, runInBackground = false, callerBru = null, parentExecutionMode = null, parentRunnerEventData = null, parentRequestUid = null, parentUnresolvedVariables = null }) => {
+  const runRequest = async ({ item, collection, envVars, processEnvVars, runtimeVariables, runInBackground = false, callerBru = null, parentExecutionMode = null, parentRunnerEventData = null, parentRequestUid = null, parentUnresolvedVariables = null, flowAbortSignal = null }) => {
     const collectionUid = collection.uid;
     const collectionPath = collection.pathname;
     const cancelTokenUid = uuid();
@@ -929,7 +934,10 @@ const registerNetworkIpc = (mainWindow) => {
     scriptingConfig.runtime = getJsSandboxRuntime(collection);
     scriptingConfig.cacheModules = false;
 
+    const abortFromFlow = () => abortController.abort();
+    flowAbortSignal?.addEventListener('abort', abortFromFlow, { once: true });
     try {
+      if (flowAbortSignal?.aborted) abortController.abort();
       request.signal = abortController.signal;
       saveCancelToken(cancelTokenUid, abortController);
 
@@ -1335,6 +1343,7 @@ const registerNetworkIpc = (mainWindow) => {
       };
     } finally {
       reportUnresolvedVariables();
+      flowAbortSignal?.removeEventListener('abort', abortFromFlow);
     }
   };
 
@@ -2205,6 +2214,96 @@ const registerNetworkIpc = (mainWindow) => {
           runCompletionTime: new Date().toISOString(),
           error: error && !error.isCancel ? error : null
         });
+      }
+    }
+  );
+
+  const flowDebuggers = new Map();
+  ipcMain.handle('renderer:flow-debug-command', async (event, { cancelTokenUid, action, context }) => {
+    const entry = flowDebuggers.get(cancelTokenUid);
+    if (!entry || entry.senderId !== event.sender?.id) throw new Error('No active debugger for this window');
+    entry.controller.resume(action, context);
+  });
+
+  ipcMain.handle(
+    'renderer:run-flow', async (event, flowItem, collection, environment, cancelTokenUid, options = {}) => {
+      const abortController = new AbortController();
+      saveCancelToken(cancelTokenUid, abortController);
+
+      const envVars = getEnvVars(environment);
+      const processEnvVars = getProcessEnvVars(collection.uid);
+      const runtimeVariables = collection.runtimeVariables || {};
+
+      const engine = new FlowExecutionEngine();
+
+      const onEvent = (type, data) => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        mainWindow.webContents.send('main:flow-event', {
+          flowUid: flowItem.uid,
+          collectionUid: collection.uid,
+          eventType: type,
+          data
+        });
+      };
+
+      const debugController = new FlowDebugController({ pauseOnStart: options.debug === true, onPause: (data) => onEvent('flow:paused', data) });
+      flowDebuggers.set(cancelTokenUid, { controller: debugController, senderId: event.sender?.id });
+      try {
+        const result = await engine.run({
+          beforeStep: (step) => debugController.beforeStep(step),
+          flowItem,
+          collection,
+          environment,
+          abortSignal: abortController.signal,
+          onEvent,
+          resolveFlow: (reference) => loadFlowFile(collection.pathname, reference),
+          loadDataset: async (reference) => {
+            const pathname = await resolveCollectionFile(collection.pathname, reference);
+            return flowFs.readFile(pathname, 'utf8');
+          },
+          executeRequest: async ({ itemRef, itemUid, context, overrides }) => {
+            const format = getCollectionFormat(collection.pathname);
+            let itemPathname = null;
+            if (itemRef) {
+              itemPathname = path.isAbsolute(itemRef) ? itemRef : path.join(collection.pathname, itemRef);
+              if (!hasRequestExtension(itemPathname, format)) {
+                itemPathname = `${itemPathname}.${format}`;
+              }
+            }
+
+            const targetItem = itemPathname
+              ? cloneDeep(findItemInCollectionByPathname(collection, itemPathname))
+              : cloneDeep(findItemInCollection(collection, itemUid));
+
+            if (!targetItem) {
+              throw new Error(`Target request not found: ${itemRef || itemUid}`);
+            }
+
+            const mergedRuntimeVars = {
+              ...runtimeVariables,
+              ...context
+            };
+
+            const effectiveItem = applyRequestOverrides(targetItem, overrides);
+            const res = await runRequest({
+              item: effectiveItem,
+              collection: collectionWithFlowRequest(collection, effectiveItem),
+              envVars,
+              processEnvVars,
+              runtimeVariables: mergedRuntimeVars,
+              runInBackground: true,
+              parentExecutionMode: 'runner',
+              flowAbortSignal: abortController.signal
+            });
+
+            return { ...res, updatedVariables: mergedRuntimeVars };
+          }
+        });
+
+        return result;
+      } finally {
+        flowDebuggers.delete(cancelTokenUid);
+        deleteCancelToken(cancelTokenUid);
       }
     }
   );

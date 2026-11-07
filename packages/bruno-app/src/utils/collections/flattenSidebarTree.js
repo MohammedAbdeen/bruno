@@ -21,7 +21,7 @@ const groupCollectionItems = (collectionItems) => {
       folders.push(item);
     } else if (item.type === 'app') {
       apps.push(item);
-    } else if (isItemARequest(item)) {
+    } else if (isItemARequest(item) || item.type === 'flow') {
       requests.push(item);
     }
   }

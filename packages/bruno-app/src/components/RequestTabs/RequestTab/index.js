@@ -18,7 +18,7 @@ import ConfirmCloseEnvironment from 'components/Environments/ConfirmCloseEnviron
 import RequestTabNotFound from './RequestTabNotFound';
 import RequestTabLoading from './RequestTabLoading';
 import SpecialTab from './SpecialTab';
-import { IconAppWindow } from '@tabler/icons';
+import { IconAppWindow, IconRoute } from '@tabler/icons';
 import StyledWrapper from './StyledWrapper';
 import MenuDropdown from 'ui/MenuDropdown';
 import CloneCollectionItem from 'components/Sidebar/Collections/Collection/CollectionItem/CloneCollectionItem/index';
@@ -689,7 +689,11 @@ const RequestTab = ({ tab, collection, tabIndex, collectionRequestTabs, folderUi
           }
         }}
       >
-        {item.type === 'app' ? (
+        {item.type === 'flow' ? (
+          <span className="tab-method flex items-center text-indigo-500" aria-label="Flow">
+            <IconRoute size={14} strokeWidth={1.5} />
+          </span>
+        ) : item.type === 'app' ? (
           <span className="tab-method flex items-center" aria-label="App">
             <IconAppWindow size={14} strokeWidth={1.5} />
           </span>
