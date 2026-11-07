@@ -1,0 +1,13 @@
+meta {
+  name: Echo
+  type: http
+  seq: 8
+}
+post {
+  url: http://localhost:8081/api/echo/everything
+  body: json
+  auth: none
+}
+body:json {
+  {"keep":true}
+}

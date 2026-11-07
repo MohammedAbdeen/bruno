@@ -11,6 +11,7 @@ import parseGrpcRequest from './items/parseGrpcRequest';
 import parseWebsocketRequest from './items/parseWebsocketRequest';
 import parseScript from './items/parseScript';
 import parseApp, { type AppFile } from './items/parseApp';
+import parseFlow, { type FlowFile } from './items/parseFlow';
 
 // Helper to get the type from an item (now in info block)
 const getItemType = (item: Item): string | undefined => {
@@ -90,6 +91,9 @@ const parseItem = (ymlString: string): BrunoItem => {
 
       case 'app':
         return parseApp(ocItem as unknown as AppFile);
+
+      case 'flow':
+        return parseFlow(ocItem as unknown as FlowFile);
 
       case 'folder':
         throw new Error('Folder items should be handled separately using parseFolder');

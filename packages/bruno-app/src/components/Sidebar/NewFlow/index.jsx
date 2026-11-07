@@ -7,6 +7,9 @@ import Modal from 'components/Modal';
 import Portal from 'components/Portal';
 import { newFlow } from 'providers/ReduxStore/slices/collections/actions';
 import { sanitizeName, validateName, validateNameError } from 'utils/common/regex';
+import { flattenItems, isItemARequest } from 'utils/collections';
+import { getRelativePath } from 'utils/common/path';
+import { FLOW_TEMPLATES, createFlowTemplate } from 'components/FlowTabPanel/starter-templates';
 
 const NewFlow = ({ collectionUid, item, onClose }) => {
   const dispatch = useDispatch();
@@ -18,7 +21,12 @@ const NewFlow = ({ collectionUid, item, onClose }) => {
 
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: { flowName: '' },
+    initialValues: { flowName: '', template: 'blank', references: {} },
+    validate: (values) => {
+      const template = FLOW_TEMPLATES.find((entry) => entry.id === values.template);
+      if (!template) return { template: 'Choose a valid starter template' };
+      return template.requests.some(([id]) => !values.references[id]) ? { references: 'Select the requests for this template' } : {};
+    },
     validationSchema: Yup.object({
       flowName: Yup.string()
         .trim()
@@ -34,7 +42,8 @@ const NewFlow = ({ collectionUid, item, onClose }) => {
           flowName: name,
           filename: sanitizeName(name),
           collectionUid,
-          itemUid: item ? item.uid : null
+          itemUid: item ? item.uid : null,
+          initialFlow: createFlowTemplate(values.template, values.references)
         })
       )
         .then(() => {
@@ -89,6 +98,23 @@ const NewFlow = ({ collectionUid, item, onClose }) => {
             value={formik.values.flowName}
             onChange={formik.handleChange}
           />
+          <label className="block mt-3">Starter template
+            <select aria-label="Starter template" className="textbox w-full mt-1" value={formik.values.template} onChange={(event) => formik.setFieldValue('template', event.target.value)}>
+              {FLOW_TEMPLATES.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+            </select>
+          </label>
+          {(FLOW_TEMPLATES.find((template) => template.id === formik.values.template)?.requests || []).map(([id, label]) => (
+            <label key={id} className="block mt-3">{label}
+              <select aria-label={label} className="textbox w-full mt-1" value={formik.values.references[id] || ''} onChange={(event) => formik.setFieldValue(`references.${id}`, event.target.value)}>
+                <option value="">Choose a saved request</option>
+                {flattenItems(collection?.items || []).filter(isItemARequest).map((request) => <option key={request.uid} value={getRelativePath(collection.pathname, request.pathname, true)}>{request.name}</option>)}
+              </select>
+            </label>
+          ))}
+          {formik.errors.template && <p role="alert" className="text-xs text-red-500 mt-2">{formik.errors.template}</p>}
+          {formik.errors.references && <p role="alert" className="text-xs text-red-500 mt-2">{formik.errors.references}</p>}
+          {formik.values.template === 'batch' && <p className="text-xs mt-2">Add data.csv to the collection root and map ctx.row fields to the processing request variables.</p>}
+          {formik.values.template === 'poll' && <p className="text-xs mt-2">Polls every 2 seconds, up to 30 times. Adapt the DONE status check and map the job ID from your submit response.</p>}
           {formik.touched.flowName && formik.errors.flowName ? (
             <div className="text-red-500 text-xs mt-2">{formik.errors.flowName}</div>
           ) : (

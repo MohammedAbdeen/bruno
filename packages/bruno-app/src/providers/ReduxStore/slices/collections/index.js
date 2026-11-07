@@ -37,6 +37,7 @@ const FILE_DERIVED_REQUEST_FIELDS = [
   'settings',
   'examples',
   'app',
+  'flow',
   'raw',
   'filename',
   'pathname',
@@ -981,6 +982,7 @@ export const collectionsSlice = createSlice({
           if (item.draft.app) {
             item.app = item.draft.app;
           }
+          if (item.draft.flow) item.flow = item.draft.flow;
           item.draft = null;
         }
       }
@@ -3149,6 +3151,7 @@ export const collectionsSlice = createSlice({
             currentItem.raw = file.data.raw;
             currentItem.settings = file.data.settings;
             currentItem.examples = file.data.examples;
+            currentItem.flow = cloneDeep(file.data.flow);
             currentItem.draft = null;
             currentItem.partial = file.partial;
             currentItem.loading = file.loading;
@@ -3166,6 +3169,7 @@ export const collectionsSlice = createSlice({
               settings: file.data.settings,
               examples: file.data.examples,
               app: file.data.app,
+              flow: cloneDeep(file.data.flow),
               filename: file.meta.name,
               pathname: file.meta.pathname,
               raw: file.data.raw,
@@ -3287,6 +3291,7 @@ export const collectionsSlice = createSlice({
               item.settings = file.data.settings;
               item.examples = file.data.examples;
               item.app = file.data.app ? { ...file.data.app } : null;
+              item.flow = cloneDeep(file.data.flow);
               item.filename = file.meta.name;
               item.pathname = file.meta.pathname;
               item.raw = file.data.raw;
@@ -3309,6 +3314,7 @@ export const collectionsSlice = createSlice({
             item.settings = file.data.settings;
             item.examples = file.data.examples;
             item.app = file.data.app ? { ...file.data.app } : null;
+            item.flow = cloneDeep(file.data.flow);
             item.filename = file.meta.name;
             item.pathname = file.meta.pathname;
             item.raw = file.data.raw;

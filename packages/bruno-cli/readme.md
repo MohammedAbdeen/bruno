@@ -155,3 +155,15 @@ See [https://github.com/usebruno/bruno/releases](https://github.com/usebruno/bru
 ## License
 
 [MIT](license.md)
+
+
+### Run a visual flow
+
+From the collection root:
+
+```sh
+bru run --flow flows/user-onboarding.flow.bru --env staging \
+  --reporter-json results.json --reporter-junit results.xml
+```
+
+Flows use the same execution engine as the desktop application, including loops, CSV/JSON datasets, sub-flows, and assertions. Requests reuse collection authentication, environment settings, scripts, and tests. Flow references are relative to the collection root. JSON and JUnit reports include failures and repeated steps; create output directories beforehand. Exit codes are 0 for success, 1 for a failed flow, and 130 for cancellation. Ordinary request runs skip flow files.

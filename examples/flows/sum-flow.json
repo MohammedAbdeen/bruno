@@ -1,0 +1,23 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Sum Example",
+  "flow": {
+    "nodes": [
+      { "id": "start", "type": "start", "position": { "x": 50, "y": 150 }, "data": { "initialVars": { "numbers": [10, 20, 30], "total": 0 } } },
+      { "id": "loop", "type": "for-each", "position": { "x": 300, "y": 150 }, "data": { "expression": "ctx.numbers", "itemVar": "item", "indexVar": "index", "maxIterations": 10 } },
+      { "id": "add", "type": "script", "position": { "x": 600, "y": 50 }, "data": { "code": "ctx.total += ctx.item;" } },
+      { "id": "verify", "type": "assert", "position": { "x": 600, "y": 300 }, "data": { "expression": "ctx.total === 60", "message": "Expected the total to equal 60", "failFast": true } },
+      { "id": "end", "type": "end", "position": { "x": 900, "y": 300 }, "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "start", "target": "loop" },
+      { "id": "e2", "source": "loop", "target": "add", "sourceHandle": "body" },
+      { "id": "e3", "source": "add", "target": "loop" },
+      { "id": "e4", "source": "loop", "target": "verify", "sourceHandle": "done" },
+      { "id": "e5", "source": "verify", "target": "end" }
+    ],
+    "viewport": { "x": 0, "y": 0, "zoom": 1 },
+    "config": { "stopOnError": true }
+  }
+}

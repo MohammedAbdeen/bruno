@@ -21,6 +21,7 @@ export type FlowNodeType
     | 'script'
     | 'end'
     | 'for-each'
+    | 'while'
     | 'sub-flow'
     | 'assert'
     | 'data-source';

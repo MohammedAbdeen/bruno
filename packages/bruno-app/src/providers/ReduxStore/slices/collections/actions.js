@@ -1949,7 +1949,7 @@ export const newApp = (params) => (dispatch, getState) => {
 };
 
 export const newFlow = (params) => (dispatch, getState) => {
-  const { flowName, filename, collectionUid, itemUid } = params;
+  const { flowName, filename, collectionUid, itemUid, initialFlow } = params;
 
   return new Promise((resolve, reject) => {
     const state = getState();
@@ -1963,7 +1963,7 @@ export const newFlow = (params) => (dispatch, getState) => {
       type: 'flow',
       name: flowName,
       filename,
-      flow: {
+      flow: initialFlow || {
         nodes: [
           {
             id: 'start-1',
@@ -2017,7 +2017,21 @@ export const newFlow = (params) => (dispatch, getState) => {
   });
 };
 
-export const runFlow = (flowItem, collectionUid) => (dispatch, getState) => {
+export const importFlowFromJson = (collectionUid, itemUid = null) => async (dispatch, getState) => {
+  const collection = findCollectionByUid(getState().collections.collections, collectionUid);
+  if (!collection) throw new Error('Collection not found');
+  try {
+    const imported = await window.ipcRenderer.invoke('renderer:import-flow-json', { collectionPath: collection.pathname });
+    if (imported.canceled) return;
+    await dispatch(newFlow({ collectionUid, itemUid, flowName: imported.name,
+      filename: sanitizeName(imported.name), initialFlow: imported.flow }));
+    toast.success('Flow imported from JSON');
+  } catch (error) {
+    toast.error(error.message || 'Could not import flow JSON');
+  }
+};
+
+export const runFlow = (flowItem, collectionUid, cancelTokenUid = uuid(), options = {}) => (dispatch, getState) => {
   const state = getState();
   const collection = findCollectionByUid(state.collections.collections, collectionUid);
 
@@ -2032,12 +2046,11 @@ export const runFlow = (flowItem, collectionUid) => (dispatch, getState) => {
       targetEnvironment: findEnvironmentInCollection(collectionCopy, collectionCopy.activeEnvironmentUid)
     });
 
-    const cancelTokenUid = uuid();
-    const itemToRun = flowItem.draft ? flowItem.draft : flowItem;
+    const itemToRun = { ...flowItem, ...flowItem.draft };
 
     const { ipcRenderer } = window;
     ipcRenderer
-      .invoke('renderer:run-flow', itemToRun, collectionCopy, environment, cancelTokenUid)
+      .invoke('renderer:run-flow', itemToRun, collectionCopy, environment, cancelTokenUid, options)
       .then(resolve)
       .catch((err) => {
         toast.error(err?.message || 'Flow execution failed');

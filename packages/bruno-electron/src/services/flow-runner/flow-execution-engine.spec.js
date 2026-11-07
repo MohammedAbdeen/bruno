@@ -191,7 +191,7 @@ describe('FlowExecutionEngine', () => {
       abortSignal: controller.signal
     });
 
-    expect(result.status).toBe('failed');
+    expect(result.status).toBe('cancelled');
     expect(result.error).toContain('aborted');
   });
 });

@@ -1,0 +1,61 @@
+meta {
+  name: Smoke
+  type: flow
+  seq: 1
+}
+
+flow {
+  data: '''
+    {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 0,
+            "y": 100
+          },
+          "data": {}
+        },
+        {
+          "id": "script",
+          "type": "script",
+          "position": {
+            "x": 280,
+            "y": 100
+          },
+          "data": {
+            "code": "ctx.result = \"original\";"
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 560,
+            "y": 100
+          },
+          "data": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "start",
+          "target": "script"
+        },
+        {
+          "id": "e2",
+          "source": "script",
+          "target": "end"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      },
+      "config": {}
+    }
+  '''
+}

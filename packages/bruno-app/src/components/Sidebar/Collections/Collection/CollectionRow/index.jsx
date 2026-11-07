@@ -27,7 +27,7 @@ import {
 } from '@tabler/icons';
 import OpenAPISyncIcon from 'components/Icons/OpenAPISync';
 import { toggleCollection, collapseFullCollection, clearSidebarSelection } from 'providers/ReduxStore/slices/collections';
-import { mountCollection, moveCollectionAndPersist, handleMultipleCollectionItemsDrop, pasteItem, showInFolder, saveCollectionSecurityConfig } from 'providers/ReduxStore/slices/collections/actions';
+import { importFlowFromJson, mountCollection, moveCollectionAndPersist, handleMultipleCollectionItemsDrop, pasteItem, showInFolder, saveCollectionSecurityConfig } from 'providers/ReduxStore/slices/collections/actions';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { addTab, makeTabPermanent } from 'providers/ReduxStore/slices/tabs';
 import { setFocusedSidebarPath } from 'providers/ReduxStore/slices/app';
@@ -422,6 +422,15 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       onClick: () => {
         ensureCollectionIsMounted();
         setShowNewFlowModal(true);
+      }
+    },
+    {
+      id: 'import-flow-json',
+      leftSection: IconRoute,
+      label: 'Import Flow (JSON)',
+      onClick: () => {
+        ensureCollectionIsMounted();
+        dispatch(importFlowFromJson(collection.uid));
       }
     },
     {

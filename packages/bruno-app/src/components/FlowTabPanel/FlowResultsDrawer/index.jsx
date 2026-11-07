@@ -1,3 +1,4 @@
+import NodeExecutionDetails from '../NodeExecutionDetails';
 import React, { useState } from 'react';
 import { IconChevronUp, IconChevronDown, IconCheck, IconX, IconClock } from '@tabler/icons';
 
@@ -5,7 +6,7 @@ const FlowResultsDrawer = ({ logs = [], runSummary, isRunning }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('timeline'); // 'timeline' | 'context'
 
-  if (!logs.length && !isRunning) {
+  if (!logs.length && !isRunning && !runSummary) {
     return null;
   }
 
@@ -74,15 +75,16 @@ const FlowResultsDrawer = ({ logs = [], runSummary, isRunning }) => {
           </div>
 
           <div className="flex-1 p-3 overflow-y-auto text-xs">
+            {runSummary?.error && <p className="text-rose-500 mb-2">{runSummary.error}</p>}
             {activeTab === 'timeline' && (
               <div className="space-y-2">
                 {logs.map((log, idx) => (
                   <div
-                    key={idx}
-                    className="p-2 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 flex items-center justify-between"
+                    key={log.stepId || idx}
+                    className="p-2 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 flex items-center justify-between flex-wrap"
                   >
                     <div className="flex items-center space-x-2">
-                      {log.status === 'success' ? (
+                      {log.status === 'running' ? <IconClock size={12} /> : log.status === 'success' ? (
                         <div className="p-1 rounded bg-emerald-500/10 text-emerald-500">
                           <IconCheck size={12} />
                         </div>
@@ -97,9 +99,10 @@ const FlowResultsDrawer = ({ logs = [], runSummary, isRunning }) => {
                       <span className="text-zinc-400 font-mono text-[11px]">
                         [{log.nodeId}]
                       </span>
-                      {log.response && (
+                      {log.result?.assertions && <span>{log.result.assertions.filter((check) => check.passed).length}/{log.result.assertions.length} assertions passed</span>}
+                      {(log.response || log.result?.response) && (
                         <span className="text-emerald-600 font-mono text-[11px]">
-                          HTTP {log.response.status}
+                          HTTP {(log.response || log.result?.response).status}
                         </span>
                       )}
                       {log.error && (
@@ -112,6 +115,10 @@ const FlowResultsDrawer = ({ logs = [], runSummary, isRunning }) => {
                       <IconClock size={10} />
                       <span>{log.duration || 0}ms</span>
                     </div>
+                    <details className="basis-full w-full mt-2">
+                      <summary className="cursor-pointer text-indigo-600">View input / output</summary>
+                      <div className="mt-2"><NodeExecutionDetails executions={[log]} /></div>
+                    </details>
                   </div>
                 ))}
               </div>

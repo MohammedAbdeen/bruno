@@ -30,6 +30,7 @@ const {
   formatSearchVariablesResult
 } = require('./context');
 const registerChatIpc = require('./chat');
+const { registerFlowGenerationIpc } = require('./flow-generation');
 
 const activeStreams = new Map();
 
@@ -410,6 +411,8 @@ const registerAiIpc = (mainWindow) => {
       activeStreams.delete(streamId);
     }
   });
+
+  registerFlowGenerationIpc({ ipcMain, generateText, resolveModel, pickDefaultModelId, activeStreams });
 
   registerChatIpc({
     mainWindow,

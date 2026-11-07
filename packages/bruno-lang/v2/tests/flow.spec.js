@@ -77,3 +77,20 @@ describe('flow block', () => {
     expect(parsed.flow.edges).toEqual([]);
   });
 });
+
+describe('Phase 4 flow persistence', () => {
+  it('preserves advanced nodes, configuration, and loop handles', () => {
+    const nodes = [
+      { id: 'loop', type: 'for-each', data: { expression: 'ctx.items', itemVar: 'item', maxIterations: 5 } },
+      { id: 'poll', type: 'while', data: { expression: '!res.body.ready', maxIterations: 10 } },
+      { id: 'child', type: 'sub-flow', data: { flowRef: 'child.flow.bru' } },
+      { id: 'dataset', type: 'data-source', data: { fileRef: 'data/users.csv', format: 'csv' } },
+      { id: 'assert', type: 'assert', data: { assertions: [{ expression: 'res.status === 200' }], failFast: false } }
+    ];
+    const edges = [{ id: 'body', source: 'loop', target: 'child', sourceHandle: 'body' },
+      { id: 'done', source: 'loop', target: 'assert', sourceHandle: 'done' }];
+    const parsed = bruToJson(jsonToBru({ meta: { type: 'flow', name: 'Advanced' }, flow: { nodes, edges } }));
+    expect(parsed.flow.nodes).toEqual(nodes);
+    expect(parsed.flow.edges).toEqual(edges);
+  });
+});

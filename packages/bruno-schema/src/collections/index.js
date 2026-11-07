@@ -621,7 +621,7 @@ const folderRootSchema = Yup.object({
 
 const flowNodeSchema = Yup.object({
   id: Yup.string().required('node id is required'),
-  type: Yup.string().oneOf(['start', 'request', 'condition', 'delay', 'script', 'end', 'for-each', 'sub-flow', 'assert', 'data-source']).required('node type is required'),
+  type: Yup.string().oneOf(['start', 'request', 'condition', 'delay', 'script', 'end', 'for-each', 'while', 'sub-flow', 'assert', 'data-source']).required('node type is required'),
   position: Yup.object({
     x: Yup.number().default(0),
     y: Yup.number().default(0)

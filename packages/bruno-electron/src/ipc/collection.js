@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const { registerFlowJsonIpc } = require('./flow-json');
+const { registerFlowValidationIpc } = require('./flow-validation');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
 const os = require('os');
@@ -2860,6 +2862,8 @@ const registerMainEventHandlers = (mainWindow) => {
 };
 
 const registerCollectionsIpc = (mainWindow, watcher) => {
+  registerFlowJsonIpc({ ipcMain, dialog, mainWindow });
+  registerFlowValidationIpc({ ipcMain });
   registerRendererEventHandlers(mainWindow, watcher);
   registerMainEventHandlers(mainWindow, watcher);
 };

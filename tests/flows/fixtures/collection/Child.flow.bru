@@ -1,0 +1,63 @@
+meta {
+  name: Child
+  type: flow
+  seq: 3
+}
+
+flow {
+  data: '''
+    {
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {}
+        },
+        {
+          "id": "sum",
+          "type": "script",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {
+            "code": "ctx.total += ctx.row.amount;"
+          }
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "position": {
+            "x": 100,
+            "y": 100
+          },
+          "data": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "start-sum",
+          "source": "start",
+          "target": "sum"
+        },
+        {
+          "id": "sum-end",
+          "source": "sum",
+          "target": "end"
+        }
+      ],
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      },
+      "config": {
+        "stopOnError": true
+      }
+    }
+  '''
+}

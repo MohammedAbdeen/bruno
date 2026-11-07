@@ -24,7 +24,7 @@ import {
 } from '@tabler/icons';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 import { addTab, focusTab, makeTabPermanent } from 'providers/ReduxStore/slices/tabs';
-import { handleMultipleCollectionItemsDrop, sendRequest, showInFolder, pasteItem, saveRequest, cloneItem } from 'providers/ReduxStore/slices/collections/actions';
+import { importFlowFromJson, handleMultipleCollectionItemsDrop, sendRequest, showInFolder, pasteItem, saveRequest, cloneItem } from 'providers/ReduxStore/slices/collections/actions';
 import { sanitizeName } from 'utils/common/regex';
 import { formatIpcError } from 'utils/common/error';
 import { toggleCollectionItem, expandItem, collapseItem, addResponseExample } from 'providers/ReduxStore/slices/collections';
@@ -329,7 +329,7 @@ const CollectionItemRow = ({
     if (event && event.detail != 1) return;
     const isRequest = isItemARequest(item);
     const isApp = item.type === 'app';
-    if (isRequest || isApp) {
+    if (isRequest || isApp || item.type === 'flow') {
       if (isTabForItemPresent) {
         dispatch(
           focusTab({
@@ -441,6 +441,12 @@ const CollectionItemRow = ({
           leftSection: IconRoute,
           label: 'New Flow',
           onClick: () => setNewFlowModalOpen(true)
+        },
+        {
+          id: 'import-flow-json',
+          leftSection: IconRoute,
+          label: 'Import Flow (JSON)',
+          onClick: () => { dispatch(importFlowFromJson(collectionUid, item.uid)); }
         },
         {
           id: 'run',

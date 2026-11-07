@@ -990,7 +990,7 @@ export const countInvalidItems = (items = []) => {
 export const sortItemsBySidebarOrder = (items = []) => {
   const folderItems = sortByNameThenSequence(filter(items, (i) => isItemAFolder(i) && !i.isTransient));
   const appItems = filter(items, (i) => i.type === 'app' && !i.isTransient).sort((a, b) => a.seq - b.seq);
-  const requestItems = filter(items, (i) => isItemARequest(i) && !i.isTransient).sort((a, b) => a.seq - b.seq);
+  const requestItems = filter(items, (i) => (isItemARequest(i) || i.type === 'flow') && !i.isTransient).sort((a, b) => a.seq - b.seq);
 
   return [...folderItems, ...appItems, ...requestItems].map((item) =>
     Array.isArray(item.items) ? { ...item, items: sortItemsBySidebarOrder(item.items) } : item
@@ -2217,7 +2217,7 @@ export const getVisibleSidebarUidsInOrder = ({ sidebarEntries = [], searchText =
   const visitItems = (items = []) => {
     const folderItems = sortByNameThenSequence(filter(items, (i) => isItemAFolder(i) && !i.isTransient));
     const appItems = [...filter(items, (i) => i.type === 'app' && !i.isTransient)].sort((a, b) => a.seq - b.seq);
-    const requestItems = [...filter(items, (i) => isItemARequest(i) && !i.isTransient)].sort((a, b) => a.seq - b.seq);
+    const requestItems = [...filter(items, (i) => (isItemARequest(i) || i.type === 'flow') && !i.isTransient)].sort((a, b) => a.seq - b.seq);
 
     folderItems.forEach((folder) => {
       if (hasSearchText && !doesFolderHaveItemsMatchSearchText(folder, searchText)) return;
