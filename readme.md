@@ -169,7 +169,26 @@ Build and debug API workflows on a visual canvas. Flow support is implemented in
 
 To create a flow, right-click a collection or folder and choose **New Flow**. Select **Blank Flow**, **OAuth2 Login & Fetch**, **Async Job Polling Loop**, or **Data-Driven Batch Run**. Choose the saved requests required by the template, adapt its variables and assertions to your API, then save and select **Run Flow**.
 
-For a ready-to-import example, choose **Import Flow (JSON)** from the collection/folder menu and select [sum-flow.json](examples/flows/sum-flow.json). It adds three numbers in a loop and verifies that the total is 60. Existing flows also offer **Import JSON** and **Export JSON** in their toolbar.
+To try JSON import, save the following as `hello-flow.json`, then choose **Import Flow (JSON)** from a collection or folder menu and select the file. It creates a simple Start → End flow. For a fuller example with a loop, script, and assertion, import [sum-flow.json](examples/flows/sum-flow.json); it adds three numbers and verifies that the total is 60. Existing flows also offer **Import JSON** and **Export JSON** in their toolbar.
+
+```json
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Hello Flow",
+  "flow": {
+    "nodes": [
+      { "id": "start", "type": "start", "position": { "x": 100, "y": 100 }, "data": {} },
+      { "id": "end", "type": "end", "position": { "x": 400, "y": 100 }, "data": {} }
+    ],
+    "edges": [
+      { "id": "start-to-end", "source": "start", "target": "end" }
+    ],
+    "viewport": { "x": 0, "y": 0, "zoom": 1 },
+    "config": { "stopOnError": true }
+  }
+}
+```
 
 Run a flow from the collection directory using this checkout's CLI:
 
