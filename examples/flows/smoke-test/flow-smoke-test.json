@@ -1,0 +1,159 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Flow Smoke Test",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 50,
+          "y": 200
+        },
+        "data": {
+          "initialVars": {
+            "numbers": [
+              10,
+              20,
+              30
+            ],
+            "total": 0,
+            "processed": 0
+          }
+        }
+      },
+      {
+        "id": "loop",
+        "type": "for-each",
+        "position": {
+          "x": 300,
+          "y": 200
+        },
+        "data": {
+          "expression": "ctx.numbers",
+          "itemVar": "item",
+          "indexVar": "index",
+          "maxIterations": 10
+        }
+      },
+      {
+        "id": "add",
+        "type": "script",
+        "position": {
+          "x": 550,
+          "y": 40
+        },
+        "data": {
+          "code": "ctx.total += ctx.item;\nctx.processed += 1;"
+        }
+      },
+      {
+        "id": "check",
+        "type": "condition",
+        "position": {
+          "x": 600,
+          "y": 300
+        },
+        "data": {
+          "expression": "ctx.total === 60 && ctx.processed === 3"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 900,
+          "y": 200
+        },
+        "data": {
+          "assertions": [
+            {
+              "expression": "ctx.total === 60",
+              "message": "Expected total to equal 60"
+            },
+            {
+              "expression": "ctx.processed === 3",
+              "message": "Expected exactly 3 iterations"
+            }
+          ],
+          "failFast": true
+        }
+      },
+      {
+        "id": "reject",
+        "type": "script",
+        "position": {
+          "x": 900,
+          "y": 450
+        },
+        "data": {
+          "code": "throw new Error('Smoke test failed: expected total 60 after 3 iterations');"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 1200,
+          "y": 200
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-loop",
+        "source": "start",
+        "target": "loop"
+      },
+      {
+        "id": "loop-add",
+        "source": "loop",
+        "target": "add",
+        "sourceHandle": "body"
+      },
+      {
+        "id": "add-loop",
+        "source": "add",
+        "target": "loop"
+      },
+      {
+        "id": "loop-check",
+        "source": "loop",
+        "target": "check",
+        "sourceHandle": "done"
+      },
+      {
+        "id": "check-verify",
+        "source": "check",
+        "target": "verify",
+        "sourceHandle": "true"
+      },
+      {
+        "id": "check-reject",
+        "source": "check",
+        "target": "reject",
+        "sourceHandle": "false"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      },
+      {
+        "id": "reject-end",
+        "source": "reject",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

@@ -1,0 +1,86 @@
+name: IntelliJ Plugin CI
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'integrations/intellij/**'
+      - 'examples/flows/**'
+      - 'packages/bruno-js/**'
+      - 'packages/bruno-cli/**'
+      - 'packages/bruno-converters/**'
+      - 'packages/bruno-io/**'
+      - 'packages/bruno-lang/**'
+      - 'packages/bruno-filestore/**'
+      - 'packages/bruno-schema/**'
+      - 'packages/bruno-common/**'
+      - 'packages/bruno-query/**'
+      - 'packages/bruno-requests/**'
+      - 'package-lock.json'
+      - '.github/workflows/intellij-plugin.yml'
+  pull_request:
+    paths:
+      - 'integrations/intellij/**'
+      - 'examples/flows/**'
+      - 'packages/bruno-js/**'
+      - 'packages/bruno-cli/**'
+      - 'packages/bruno-converters/**'
+      - 'packages/bruno-io/**'
+      - 'packages/bruno-lang/**'
+      - 'packages/bruno-filestore/**'
+      - 'packages/bruno-schema/**'
+      - 'packages/bruno-common/**'
+      - 'packages/bruno-query/**'
+      - 'packages/bruno-requests/**'
+      - 'package-lock.json'
+      - '.github/workflows/intellij-plugin.yml'
+
+jobs:
+  build:
+    name: Build & Test IntelliJ Plugin
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Prepare Bruno CLI and QuickJS runtime
+        run: |
+          npm ci --ignore-scripts --workspace=@usebruno/js --workspace=@usebruno/cli --include-workspace-root=false
+          npm run sandbox:bundle-libraries --workspace=@usebruno/js
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run Plugin Tests
+        run: ./gradlew test --info
+        working-directory: integrations/intellij
+
+      - name: Verify bridge on Spring Boot 4
+        run: ./gradlew -PbridgeModern :spring-bridge:test
+        working-directory: integrations/intellij
+
+      - name: Build Plugin Package
+        run: ./gradlew buildPlugin verifyPluginStructure
+        working-directory: integrations/intellij
+
+      - name: Upload Plugin Artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: bruno-intellij-plugin
+          path: integrations/intellij/build/distributions/*.zip

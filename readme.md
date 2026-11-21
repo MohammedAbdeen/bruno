@@ -201,6 +201,8 @@ The resolved environment and CLI `--env-var` values are available directly in `c
 
 See [flow authoring and request overrides](docs/flows-phase7.md), [node input/output inspection](docs/flows-node-inspection.md), [JSON interchange](docs/flows-json.md), and [CLI flow execution](docs/flows-cli.md). The [implementation plan](FLOWS_PLAN.md) and [desktop validation notes](docs/flows-desktop-validation.md) track completed work and test coverage.
 
+An experimental IntelliJ IDEA integration is available in [integrations/intellij](integrations/intellij/README.md). Version 0.4.9 adds a module/controller API tree and source gutter actions, persistent request tabs, IDE-wide environments with credential-store secrets, structured request editors, response viewers, JSON flow import, flow execution history with per-step input/output, OpenAPI export, Bruno JS hooks, and an optional development bridge for direct MVC and scheduled-task invocation. The tool window adapts to narrow widths and also runs saved collection flows with the Bruno CLI.
+
 ### Run across multiple platforms 🖥️
 
 ![bruno](assets/images/run-anywhere.png) <br /><br />

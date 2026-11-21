@@ -36,3 +36,7 @@ npx playwright test tests/flows/flows.spec.ts --grep 'exports JSON' --project=de
 Verified with 7 format/file-dialog unit tests and an Electron test that exports, imports, and executes the imported flow.
 
 The provided [Sum Example](../examples/flows/sum-flow.json) is covered by Electron regression tests in both Bru and YAML collections: import, restart, reopen, execute, and assert `total === 60`. After updating file-storage code, restart the development app so its main process and parser workers load the rebuilt package.
+
+## IntelliJ plugin
+
+Plugin 0.4.6 adds **Bruno → Flows → Import JSON…** in both empty and populated views. Choose the JSON file and destination collection folder; the plugin validates and creates a uniquely named native flow, opens it and selects it. Click Run Flow explicitly to execute. Import needs no CLI, while execution requires the configured flow-enabled runner. See [plugin setup](../integrations/intellij/README.md).

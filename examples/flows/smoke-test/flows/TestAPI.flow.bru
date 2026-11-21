@@ -1,0 +1,11 @@
+meta {
+  name: TestAPI
+  type: flow
+  seq: 1
+}
+
+flow {
+  data: '''
+    {"nodes":[{"id":"start","type":"start","position":{"x":0,"y":100},"data":{}},{"id":"end","type":"end","position":{"x":300,"y":100},"data":{}}],"edges":[{"id":"start-end","source":"start","target":"end"}],"config":{}}
+  '''
+}

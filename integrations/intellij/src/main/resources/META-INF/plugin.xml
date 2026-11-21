@@ -1,0 +1,43 @@
+<idea-plugin>
+    <id>com.usebruno.intellij.flows</id>
+    <name>Bruno</name>
+    <vendor url="https://github.com/usebruno/bruno">Bruno</vendor>
+    <description><![CDATA[
+        Discover Java Spring controller APIs, send requests with headers and named environments, and run Bruno flows.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <actions>
+        <action id="Bruno.SendRequest" class="com.usebruno.intellij.flows.BrunoSendAction" text="Send Bruno Request">
+            <keyboard-shortcut keymap="$default" first-keystroke="control ENTER"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta ENTER"/>
+        </action>
+        <action id="Bruno.CloseRequest" class="com.usebruno.intellij.flows.BrunoCloseAction" text="Close Bruno Request">
+            <keyboard-shortcut keymap="$default" first-keystroke="control W"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta W"/>
+        </action>
+        <action id="BrunoFlows.OpenToolWindow"
+                class="com.usebruno.intellij.flows.OpenBrunoFlowsAction"
+                text="Bruno: Open Tool Window"
+                description="Open the Bruno tool window">
+            <add-to-group group-id="ViewMenu" anchor="last"/>
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="Bruno" displayType="BALLOON" isLogByDefault="true"/>
+        <projectService serviceImplementation="com.usebruno.intellij.flows.ApiSettings"/>
+        <projectService serviceImplementation="com.usebruno.intellij.flows.WorkspaceState"/>
+        <projectService serviceImplementation="com.usebruno.intellij.flows.ProjectPreferences"/>
+        <applicationService serviceImplementation="com.usebruno.intellij.flows.BrunoPreferences"/>
+        <applicationService serviceImplementation="com.usebruno.intellij.flows.GlobalApiSettings"/>
+        <codeInsight.lineMarkerProvider language="JAVA" implementationClass="com.usebruno.intellij.flows.ControllerGutterProvider"/>
+        <projectConfigurable parentId="tools" id="Bruno.Settings" displayName="Bruno"
+                             instance="com.usebruno.intellij.flows.BrunoConfigurable"/>
+        <toolWindow id="Bruno"
+                    anchor="right"
+                    factoryClass="com.usebruno.intellij.flows.BrunoFlowsToolWindowFactory"/>
+    </extensions>
+</idea-plugin>
