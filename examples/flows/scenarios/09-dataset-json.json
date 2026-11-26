@@ -1,0 +1,106 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Data Driven JSON",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "names": [],
+            "total": 0
+          }
+        }
+      },
+      {
+        "id": "rows",
+        "type": "data-source",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "fileRef": "data/users.json",
+          "format": "json",
+          "itemVar": "row",
+          "indexVar": "rowIndex",
+          "maxIterations": 10
+        }
+      },
+      {
+        "id": "collect",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.names.push(ctx.row.name); ctx.total += Number(ctx.row.amount);"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.names.join(\",\") === \"Alice,Bob\" && ctx.total === 30"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-rows",
+        "source": "start",
+        "target": "rows"
+      },
+      {
+        "id": "rows-collect-body",
+        "source": "rows",
+        "target": "collect",
+        "sourceHandle": "body"
+      },
+      {
+        "id": "collect-rows",
+        "source": "collect",
+        "target": "rows"
+      },
+      {
+        "id": "rows-verify-done",
+        "source": "rows",
+        "target": "verify",
+        "sourceHandle": "done"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "For Each Array",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "numbers": [
+              10,
+              20,
+              30
+            ],
+            "total": 0,
+            "seen": []
+          }
+        }
+      },
+      {
+        "id": "loop",
+        "type": "for-each",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.numbers",
+          "itemVar": "number",
+          "indexVar": "numberIndex",
+          "maxIterations": 10
+        }
+      },
+      {
+        "id": "add",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.total += ctx.number; ctx.seen.push(ctx.numberIndex);"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.total === 60 && ctx.seen.join(\",\") === \"0,1,2\""
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-loop",
+        "source": "start",
+        "target": "loop"
+      },
+      {
+        "id": "loop-add-body",
+        "source": "loop",
+        "target": "add",
+        "sourceHandle": "body"
+      },
+      {
+        "id": "add-loop",
+        "source": "add",
+        "target": "loop"
+      },
+      {
+        "id": "loop-verify-done",
+        "source": "loop",
+        "target": "verify",
+        "sourceHandle": "done"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

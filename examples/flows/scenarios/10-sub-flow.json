@@ -1,0 +1,78 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Parent and Child",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "parentValue": 21
+          }
+        }
+      },
+      {
+        "id": "child",
+        "type": "sub-flow",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "flowRef": "flows/child.flow.bru"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.childValue === 42 && ctx.parentValue === 21"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-child",
+        "source": "start",
+        "target": "child"
+      },
+      {
+        "id": "child-verify",
+        "source": "child",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

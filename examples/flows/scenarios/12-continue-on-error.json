@@ -1,0 +1,90 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Continue on Error",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {}
+      },
+      {
+        "id": "fail",
+        "type": "script",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "code": "throw new Error(\"Intentional example failure\");"
+        }
+      },
+      {
+        "id": "cleanup",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.cleanedUp = true;"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.cleanedUp === true"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-fail",
+        "source": "start",
+        "target": "fail"
+      },
+      {
+        "id": "fail-cleanup",
+        "source": "fail",
+        "target": "cleanup"
+      },
+      {
+        "id": "cleanup-verify",
+        "source": "cleanup",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": false
+    }
+  }
+}

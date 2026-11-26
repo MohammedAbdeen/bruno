@@ -199,9 +199,89 @@ node /path/to/bruno/packages/bruno-cli/bin/bru.js run \
 
 The resolved environment and CLI `--env-var` values are available directly in `ctx`, including before the first request. JSON and JUnit flow reports are supported. Body overrides shallow-merge JSON objects; binary and multipart request captures cannot be reconstructed by Copy as cURL. Templates require API-specific mappings, and interactive debugging is available in the desktop app.
 
+#### Flow JSON examples by scenario
+
+The [scenario collection](examples/flows/scenarios/README.md) includes complete importable JSON files for **all 11 supported node types**, saved requests, CSV/JSON datasets, and a local demo API. Download or clone this repository to keep the supporting files together.
+
+| Scenario | JSON import file | What it demonstrates |
+| --- | --- | --- |
+| Start → End | [01-blank.json](examples/flows/scenarios/01-blank.json) | Minimal runnable graph |
+| Variables and scripts | [02-variables-and-script.json](examples/flows/scenarios/02-variables-and-script.json) | Initial context, CLI variables, scripts, multiple assertions, desktop breakpoint |
+| Request and response validation | [03-request-and-schema.json](examples/flows/scenarios/03-request-and-schema.json) | Saved request, output mappings, request-script variables, JSON Schema |
+| Login → authenticated request | [04-login-and-authorized-request.json](examples/flows/scenarios/04-login-and-authorized-request.json) | Extract a token and interpolate it into an Authorization header |
+| True/false branches | [05-conditional-branches.json](examples/flows/scenarios/05-conditional-branches.json) | Choose a route and rejoin after the branch |
+| For-each loop | [06-for-each.json](examples/flows/scenarios/06-for-each.json) | Array iteration, named item/index variables, accumulation |
+| Polling with a delay | [07-polling-with-delay.json](examples/flows/scenarios/07-polling-with-delay.json) | While loop, response mapping, delay, iteration limit |
+| CSV-driven batch | [08-dataset-csv.json](examples/flows/scenarios/08-dataset-csv.json) | CSV headers become row properties; numeric strings are converted explicitly |
+| JSON-driven batch | [09-dataset-json.json](examples/flows/scenarios/09-dataset-json.json) | Iterate an array of objects from a collection file |
+| Reusable sub-flow | [10-sub-flow.json](examples/flows/scenarios/10-sub-flow.json), [10-child.json](examples/flows/scenarios/10-child.json) | Pass parent context into a child and receive its changes |
+| Per-node request overrides | [11-request-overrides.json](examples/flows/scenarios/11-request-overrides.json) | Override headers, query parameters, and JSON body without editing the saved request |
+| Continue after an error | [12-continue-on-error.json](examples/flows/scenarios/12-continue-on-error.json) | Run cleanup with `stopOnError: false`; final status remains failed |
+| Collect assertion failures | [13-collect-assertion-failures.json](examples/flows/scenarios/13-collect-assertion-failures.json) | Evaluate every check with `failFast: false`, then continue |
+| Stop on first failure | [14-stop-on-error.json](examples/flows/scenarios/14-stop-on-error.json) | Fail-fast assertions and stopping before downstream nodes |
+| Runaway-loop protection | [15-loop-limit.json](examples/flows/scenarios/15-loop-limit.json) | An intentionally endless condition is stopped by `maxIterations` |
+
+**Try it:** open `examples/flows/scenarios` as a collection, then import one of its numbered JSON files. In IntelliJ, use **Bruno → Flows → Import JSON…** and choose this directory as the destination collection. Set the flow runner to this checkout's CLI. Examples 01, 02, 05, 06, 08, 09, and 10 need no HTTP server. Examples 12–15 intentionally fail to demonstrate error reporting.
+
+For examples that send requests, start the local API from the repository root:
+
+```sh
+node examples/flows/scenarios/mock-server.cjs
+```
+
+Set `baseUrl` to `http://127.0.0.1:4010` in the collection environment, or pass `--env-var baseUrl=http://127.0.0.1:4010` to the CLI. IntelliJ's API environment selector and CLI flow environment are separate; use a collection environment for **Run Flow**. Import creates a native flow file; run that file rather than passing the interchange `.json` directly to `--flow`.
+
+For example, after importing `11-request-overrides.json`, run from the scenario collection directory (substitute the actual imported filename):
+
+```sh
+node /path/to/bruno/packages/bruno-cli/bin/bru.js run \
+  --flow 'flows/Request Overrides.flow.bru' \
+  --env-var baseUrl=http://127.0.0.1:4010
+```
+
+Request-node configuration uses a **saved request reference**, with response properties mapped into `ctx`:
+
+```json
+{
+  "id": "login",
+  "type": "request",
+  "position": { "x": 360, "y": 100 },
+  "data": {
+    "itemRef": "requests/login.bru",
+    "outputVars": { "token": "res.body.token" }
+  }
+}
+```
+
+Another request node can reuse that token and change parameters/body for this step:
+
+```json
+{
+  "id": "post",
+  "type": "request",
+  "position": { "x": 620, "y": 100 },
+  "data": {
+    "itemRef": "requests/post.bru",
+    "overrides": {
+      "headers": { "Authorization": "Bearer {{token}}" },
+      "params": { "page": 2 },
+      "body": { "name": "{{label}}" }
+    }
+  }
+}
+```
+
+These two snippets are **node fragments**; the linked files contain full importable graphs. Request, dataset, and sub-flow paths are relative to the destination collection root. Importing JSON transfers the graph; copy its supporting files too. See the [scenario guide](examples/flows/scenarios/README.md) for branch/loop wiring, expected results, variable precedence, failure policies, and report commands.
+
+To validate every supplied scenario against the importer and real CLI, run from this checkout with dependencies installed:
+
+```sh
+node examples/flows/scenarios/verify.cjs
+```
+
 See [flow authoring and request overrides](docs/flows-phase7.md), [node input/output inspection](docs/flows-node-inspection.md), [JSON interchange](docs/flows-json.md), and [CLI flow execution](docs/flows-cli.md). The [implementation plan](FLOWS_PLAN.md) and [desktop validation notes](docs/flows-desktop-validation.md) track completed work and test coverage.
 
-An experimental IntelliJ IDEA integration is available in [integrations/intellij](integrations/intellij/README.md). Version 0.4.9 adds a module/controller API tree and source gutter actions, persistent request tabs, IDE-wide environments with credential-store secrets, structured request editors, response viewers, JSON flow import, flow execution history with per-step input/output, OpenAPI export, Bruno JS hooks, and an optional development bridge for direct MVC and scheduled-task invocation. The tool window adapts to narrow widths and also runs saved collection flows with the Bruno CLI.
+An experimental IntelliJ IDEA integration is available in [integrations/intellij](integrations/intellij/README.md). Version 0.4.10 adds a module/controller API tree and source gutter actions, persistent request tabs, IDE-wide environments with credential-store secrets, structured request editors, response viewers, JSON flow import, flow execution history with per-step input/output, OpenAPI export, Bruno JS hooks, and an optional development bridge for direct MVC and scheduled-task invocation. The tool window adapts to narrow widths and also runs saved collection flows with the Bruno CLI.
 
 ### Run across multiple platforms 🖥️
 

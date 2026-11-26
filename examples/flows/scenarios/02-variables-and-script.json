@@ -1,0 +1,97 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Variables and Script",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "numbers": [
+              10,
+              20,
+              30
+            ],
+            "buildId": "9421"
+          }
+        }
+      },
+      {
+        "id": "compute",
+        "type": "script",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.total = ctx.numbers.reduce((sum, value) => sum + value, 0); ctx.message = \"Build \" + ctx.buildId;",
+          "breakpoint": true
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "assertions": [
+            {
+              "expression": "ctx.total === 60;",
+              "message": "Sum should be 60"
+            },
+            {
+              "expression": "ctx.message === \"Build 9421\"",
+              "message": "Pass --env-var buildId=9421 or use the default"
+            }
+          ]
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-compute",
+        "source": "start",
+        "target": "compute"
+      },
+      {
+        "id": "compute-verify",
+        "source": "compute",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true,
+      "initialVars": {
+        "total": 0
+      },
+      "maxSteps": 100
+    }
+  }
+}

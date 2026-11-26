@@ -1,0 +1,117 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Conditional Branches",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "usePrimary": true
+          }
+        }
+      },
+      {
+        "id": "choose",
+        "type": "condition",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.usePrimary === true"
+        }
+      },
+      {
+        "id": "primary",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.route = \"primary\";"
+        }
+      },
+      {
+        "id": "fallback",
+        "type": "script",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.route = \"fallback\";"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {
+          "expression": "ctx.route === (ctx.usePrimary ? \"primary\" : \"fallback\")"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 360,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-choose",
+        "source": "start",
+        "target": "choose"
+      },
+      {
+        "id": "choose-primary-true",
+        "source": "choose",
+        "target": "primary",
+        "sourceHandle": "true"
+      },
+      {
+        "id": "choose-fallback-false",
+        "source": "choose",
+        "target": "fallback",
+        "sourceHandle": "false"
+      },
+      {
+        "id": "primary-verify",
+        "source": "primary",
+        "target": "verify"
+      },
+      {
+        "id": "fallback-verify",
+        "source": "fallback",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

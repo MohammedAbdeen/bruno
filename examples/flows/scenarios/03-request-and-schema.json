@@ -1,0 +1,104 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Request and Response Schema",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {}
+      },
+      {
+        "id": "fetch",
+        "type": "request",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "itemRef": "requests/echo.bru",
+          "outputVars": {
+            "echoMethod": "res.body.method",
+            "savedStatus": "res.status"
+          }
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "method",
+              "query",
+              "headers"
+            ],
+            "properties": {
+              "method": {
+                "const": "GET"
+              },
+              "query": {
+                "type": "object"
+              },
+              "headers": {
+                "type": "object"
+              }
+            }
+          },
+          "assertions": [
+            {
+              "expression": "res.status === 200 && ctx.savedStatus === 200"
+            },
+            {
+              "expression": "ctx.echoMethod === \"GET\" && ctx.scriptMarker === \"from-request-script\""
+            }
+          ]
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-fetch",
+        "source": "start",
+        "target": "fetch"
+      },
+      {
+        "id": "fetch-verify",
+        "source": "fetch",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

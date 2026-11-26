@@ -1,0 +1,84 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Stop on Error",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {}
+      },
+      {
+        "id": "checks",
+        "type": "assert",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "failFast": true,
+          "assertions": [
+            {
+              "expression": "false",
+              "message": "Intentional fail-fast assertion"
+            },
+            {
+              "expression": "false",
+              "message": "This check is skipped"
+            }
+          ]
+        }
+      },
+      {
+        "id": "unreached",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.shouldNotRun = true;"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-checks",
+        "source": "start",
+        "target": "checks"
+      },
+      {
+        "id": "checks-unreached",
+        "source": "checks",
+        "target": "unreached"
+      },
+      {
+        "id": "unreached-end",
+        "source": "unreached",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

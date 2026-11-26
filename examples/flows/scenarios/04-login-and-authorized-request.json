@@ -1,0 +1,98 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Login and Authorized Request",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {}
+      },
+      {
+        "id": "login",
+        "type": "request",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "itemRef": "requests/login.bru",
+          "outputVars": {
+            "token": "res.body.token"
+          }
+        }
+      },
+      {
+        "id": "fetch",
+        "type": "request",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "itemRef": "requests/echo.bru",
+          "overrides": {
+            "headers": {
+              "Authorization": "Bearer {{token}}"
+            }
+          }
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "expression": "res.status === 200 && res.body.headers.authorization === \"Bearer local-demo-token\""
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-login",
+        "source": "start",
+        "target": "login"
+      },
+      {
+        "id": "login-fetch",
+        "source": "login",
+        "target": "fetch"
+      },
+      {
+        "id": "fetch-verify",
+        "source": "fetch",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

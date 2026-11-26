@@ -1,0 +1,84 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Collect Assertion Failures",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {}
+      },
+      {
+        "id": "checks",
+        "type": "assert",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "failFast": false,
+          "assertions": [
+            {
+              "expression": "false",
+              "message": "Intentional failure one"
+            },
+            {
+              "expression": "1 === 2",
+              "message": "Intentional failure two"
+            }
+          ]
+        }
+      },
+      {
+        "id": "cleanup",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.cleanedUp = true;"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-checks",
+        "source": "start",
+        "target": "checks"
+      },
+      {
+        "id": "checks-cleanup",
+        "source": "checks",
+        "target": "cleanup"
+      },
+      {
+        "id": "cleanup-end",
+        "source": "cleanup",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

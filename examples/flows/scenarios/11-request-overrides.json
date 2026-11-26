@@ -1,0 +1,105 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Request Overrides",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "label": "flow-demo"
+          }
+        }
+      },
+      {
+        "id": "post",
+        "type": "request",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "itemRef": "requests/post.bru",
+          "overrides": {
+            "headers": {
+              "X-Flow": "{{label}}"
+            },
+            "params": {
+              "page": 2
+            },
+            "body": {
+              "name": "{{label}}",
+              "nested": {
+                "new": true
+              }
+            }
+          },
+          "outputVars": {
+            "createdName": "res.body.body.name"
+          }
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "assertions": [
+            {
+              "expression": "res.body.headers[\"x-flow\"] === ctx.label && res.body.query.page === \"2\""
+            },
+            {
+              "expression": "ctx.createdName === ctx.label && res.body.body.keep === 1"
+            },
+            {
+              "expression": "res.body.body.nested.new === true && res.body.body.nested.old === undefined"
+            }
+          ]
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-post",
+        "source": "start",
+        "target": "post"
+      },
+      {
+        "id": "post-verify",
+        "source": "post",
+        "target": "verify"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

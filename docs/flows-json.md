@@ -1,5 +1,7 @@
 # Import and export flows as JSON
 
+For complete examples covering all supported node types, authentication, branching, polling, datasets, sub-flows, request overrides, and failure policies, see the [scenario collection and setup guide](../examples/flows/scenarios/README.md) and [README scenario catalog](../readme.md#flow-json-examples-by-scenario). Supporting requests and datasets are included, together with a local demo API and CLI verifier.
+
 **Export:** open a flow and choose **Export JSON** in the toolbar, then select where to save the `.json` file. This includes current unsaved graph edits.
 
 **Import:** right-click a collection or folder and choose **Import Flow (JSON)**, or choose **Import JSON** in an open flow’s toolbar. Select a JSON file. Import creates and opens a new flow in the collection (or selected folder); it does not replace the current flow. Existing filenames are handled by the normal unique-file creation path.

@@ -1,0 +1,86 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Loop Limit Protection",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "ticks": 0
+          }
+        }
+      },
+      {
+        "id": "loop",
+        "type": "while",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "expression": "true",
+          "maxIterations": 2
+        }
+      },
+      {
+        "id": "tick",
+        "type": "script",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "code": "ctx.ticks += 1;"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-loop",
+        "source": "start",
+        "target": "loop"
+      },
+      {
+        "id": "loop-tick-body",
+        "source": "loop",
+        "target": "tick",
+        "sourceHandle": "body"
+      },
+      {
+        "id": "tick-loop",
+        "source": "tick",
+        "target": "loop"
+      },
+      {
+        "id": "loop-end-done",
+        "source": "loop",
+        "target": "end",
+        "sourceHandle": "done"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true
+    }
+  }
+}

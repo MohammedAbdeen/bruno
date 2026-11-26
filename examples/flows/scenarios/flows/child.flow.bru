@@ -1,0 +1,11 @@
+meta {
+  name: Reusable Child
+  type: flow
+  seq: 1
+}
+
+flow {
+  data: '''
+    {"nodes":[{"id":"start","type":"start","position":{"x":100,"y":100},"data":{"initialVars":{"parentValue":21}}},{"id":"compute","type":"script","position":{"x":360,"y":100},"data":{"code":"ctx.childValue = ctx.parentValue * 2;"}},{"id":"end","type":"end","position":{"x":620,"y":100},"data":{}}],"edges":[{"id":"start-compute","source":"start","target":"compute"},{"id":"compute-end","source":"compute","target":"end"}],"viewport":{"x":0,"y":0,"zoom":0.8},"config":{"stopOnError":true}}
+  '''
+}

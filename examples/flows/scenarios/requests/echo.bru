@@ -1,0 +1,15 @@
+meta {
+  name: Echo
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/echo
+  body: none
+  auth: none
+}
+
+script:post-response {
+  bru.setVar("scriptMarker", "from-request-script");
+}

@@ -1,0 +1,144 @@
+{
+  "type": "bruno-flow",
+  "version": 1,
+  "name": "Bounded Polling with Delay",
+  "flow": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "initialVars": {
+            "jobStatus": "PENDING",
+            "attempt": 0
+          }
+        }
+      },
+      {
+        "id": "poll",
+        "type": "while",
+        "position": {
+          "x": 360,
+          "y": 100
+        },
+        "data": {
+          "expression": "ctx.jobStatus !== \"DONE\"",
+          "maxIterations": 5
+        }
+      },
+      {
+        "id": "wait",
+        "type": "delay",
+        "position": {
+          "x": 620,
+          "y": 100
+        },
+        "data": {
+          "durationMs": 20
+        }
+      },
+      {
+        "id": "fetch",
+        "type": "request",
+        "position": {
+          "x": 880,
+          "y": 100
+        },
+        "data": {
+          "itemRef": "requests/echo.bru",
+          "overrides": {
+            "params": {
+              "attempt": "{{attempt}}"
+            }
+          },
+          "outputVars": {
+            "jobStatus": "res.body.jobStatus"
+          }
+        }
+      },
+      {
+        "id": "advance",
+        "type": "script",
+        "position": {
+          "x": 100,
+          "y": 330
+        },
+        "data": {
+          "code": "ctx.attempt += 1;"
+        }
+      },
+      {
+        "id": "verify",
+        "type": "assert",
+        "position": {
+          "x": 360,
+          "y": 330
+        },
+        "data": {
+          "expression": "ctx.jobStatus === \"DONE\" && ctx.attempt === 3"
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "position": {
+          "x": 620,
+          "y": 330
+        },
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-poll",
+        "source": "start",
+        "target": "poll"
+      },
+      {
+        "id": "poll-wait-body",
+        "source": "poll",
+        "target": "wait",
+        "sourceHandle": "body"
+      },
+      {
+        "id": "wait-fetch",
+        "source": "wait",
+        "target": "fetch"
+      },
+      {
+        "id": "fetch-advance",
+        "source": "fetch",
+        "target": "advance"
+      },
+      {
+        "id": "advance-poll",
+        "source": "advance",
+        "target": "poll"
+      },
+      {
+        "id": "poll-verify-done",
+        "source": "poll",
+        "target": "verify",
+        "sourceHandle": "done"
+      },
+      {
+        "id": "verify-end",
+        "source": "verify",
+        "target": "end"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 0.8
+    },
+    "config": {
+      "stopOnError": true,
+      "maxSteps": 100
+    }
+  }
+}
