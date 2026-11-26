@@ -433,3 +433,8 @@ Bound expanded variable output and reuse resolved values, cancel obsolete respon
 ### 0.4.9 Stitch review
 
 Consolidated request commands and explicit bounded resolved URL; compact global environment captions and native search hints; width-aware flow toolbars and stacked collection environment selection; narrow empty-state actions. Design source and validation are in UI_REVIEW_0.4.9.md.
+
+
+### 0.4.10 platform follow-up
+
+Environment updates are event-driven, with no idle per-tab settings polling and no selector rebuild for session-only changes. Cached Close actions retain their original request; delayed focus respects active ownership. Lifecycle and cancellation changes follow Context7 SDK guidance and JetBrains inspections; details are in PLATFORM_REVIEW_0.4.10.md.

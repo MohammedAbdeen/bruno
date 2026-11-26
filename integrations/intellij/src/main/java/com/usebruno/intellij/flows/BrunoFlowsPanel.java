@@ -48,6 +48,7 @@ final class BrunoFlowsPanel extends JPanel implements com.intellij.openapi.Dispo
         super(new BorderLayout());
         this.project = project;
         history=project.getService(FlowRunHistory.class); runView=new FlowRunView(history);
+        com.intellij.openapi.util.Disposer.register(this,runView);
         setBorder(JBUI.Borders.empty(6));
         output.setEditable(false);
         output.setLineWrap(true); output.setWrapStyleWord(false);
@@ -452,7 +453,7 @@ final class BrunoFlowsPanel extends JPanel implements com.intellij.openapi.Dispo
     }
 
     @Override public void dispose() {
-        disposed=true; scanGeneration.incrementAndGet(); runView.dispose();
+        disposed=true; scanGeneration.incrementAndGet();
         if (importTask!=null) importTask.cancel(true);
         var process=runningProcess.getAndSet(null);
         if (process!=null) { process.descendants().forEach(ProcessHandle::destroyForcibly); process.destroyForcibly(); }

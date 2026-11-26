@@ -70,7 +70,7 @@ public class StitchUiReviewTest extends BrunoPlatformTestCase {
                 screenshot(panel,"stitch-flows-"+width+".png");
             }
         } finally {
-            if (frame!=null) frame.dispose(); panel.dispose(); state.flowCollections.clear(); state.flowCollections.addAll(previous);
+            if (frame!=null) frame.dispose(); com.intellij.openapi.util.Disposer.dispose(panel); state.flowCollections.clear(); state.flowCollections.addAll(previous);
             try (var paths=Files.walk(root)) { for (var path:paths.sorted(Comparator.reverseOrder()).toList()) Files.deleteIfExists(path); }
         }
     }
@@ -87,7 +87,7 @@ public class StitchUiReviewTest extends BrunoPlatformTestCase {
             resize(empty,null,320,700);
             screenshot(empty,"stitch-flows-empty-320.png");
             for (String text:List.of("Create New Flow","Import JSON…","Init Bruno Collection","Refresh")) contained(empty,button(empty,text));
-        } finally { Disposer.dispose(explorer); empty.dispose(); }
+        } finally { Disposer.dispose(explorer); com.intellij.openapi.util.Disposer.dispose(empty); }
     }
     private static JFrame show(JComponent root,String title) {
         if (!Boolean.getBoolean("bruno.guiTests")) return null;

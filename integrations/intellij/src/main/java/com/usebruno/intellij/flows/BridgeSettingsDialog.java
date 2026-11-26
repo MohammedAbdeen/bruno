@@ -58,7 +58,7 @@ final class BridgeSettingsDialog extends DialogWrapper {
                     if (source == null || metadata == null) throw new java.io.IOException("Bridge artifacts were not packaged.");
                     Files.copy(source,jar,StandardCopyOption.REPLACE_EXISTING); Files.copy(metadata,pom,StandardCopyOption.REPLACE_EXISTING);
                 }
-                BrunoNotifications.info(project,"Exported bridge starter and POM to " + destination + ". Install with mvn install:install-file -Dfile=bruno-spring-bridge.jar -DpomFile=bruno-spring-bridge.pom, then add com.usebruno:bruno-spring-bridge:0.4.9 to the application.");
+                BrunoNotifications.info(project,"Exported bridge starter and POM to " + destination + ". Install with mvn install:install-file -Dfile=bruno-spring-bridge.jar -DpomFile=bruno-spring-bridge.pom, then add com.usebruno:bruno-spring-bridge:0.4.10 to the application.");
             } catch (Exception error) { BrunoNotifications.error(project,"Could not export bridge files. Check destination permissions."); }
         });
     }

@@ -267,3 +267,8 @@ Fixed exponential nested-variable expansion, obsolete response-formatting jobs a
 ### 0.4.9: Stitch-assisted native UI review
 
 Reviewed wide/narrow workspace screenshots with Stitch MCP and inspected its refined reference. Fixed redundant request header rows, ambiguous/unbounded resolved URL display, cramped environment controls, unreliable search hints, clipped wrapping Flow actions and narrow empty-state actions. Added viewport/ancestor-bound regression assertions and retained native components/themes. Full baseline: 120 plugin + 5 companion tests passed. See [UI_REVIEW_0.4.9.md](UI_REVIEW_0.4.9.md).
+
+
+### 0.4.10: Context7 and JetBrains platform review
+
+Applied SDK lifecycle/cancellation guidance and IDE findings: event-driven request environment updates, stable profile selector on session changes, original-target Close callbacks, guarded queued focus, proper Disposer ownership and release of workspace references. Added cancellation checkpoints to discovery and OpenAPI work. Full baseline: 126 plugin + 5 companion tests passed. JetBrains build and error-only inspections passed. See [PLATFORM_REVIEW_0.4.10.md](PLATFORM_REVIEW_0.4.10.md).

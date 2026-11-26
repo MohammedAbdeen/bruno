@@ -19,7 +19,7 @@ Add the dependency to a development Maven profile:
     <dependency>
       <groupId>com.usebruno</groupId>
       <artifactId>bruno-spring-bridge</artifactId>
-      <version>0.4.9</version>
+      <version>0.4.10</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
@@ -29,7 +29,7 @@ Add the dependency to a development Maven profile:
 For Gradle with the Spring Boot plugin, add `mavenLocal()` to repositories and:
 
 ```kotlin
-developmentOnly("com.usebruno:bruno-spring-bridge:0.4.9")
+developmentOnly("com.usebruno:bruno-spring-bridge:0.4.10")
 ```
 
 Use a development application profile to enable the companion:

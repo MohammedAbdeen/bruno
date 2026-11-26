@@ -1,6 +1,6 @@
 # IntelliJ implementation status
 
-Active release: 0.4.9. Delivery branch: feat/intellij-plugin-ui-review.
+Active release: 0.4.10. Delivery branch: feat/intellij-plugin-ui-review.
 
 Implemented:
 - IDE-wide environment/profile storage and migration from existing project profiles, preserving secret references and name collisions.
@@ -99,3 +99,12 @@ Screenshot follow-up verified:
 - Added width-aware Flow action wrapping, stacked collection environment controls, and narrow empty-state layout. Resizing preserves component attachment and draft contents.
 - Full baseline: 120 plugin + 5 companion tests passed, zero failures/errors/skips. See UI_REVIEW_0.4.9.md for design reference, findings and verification.
 - Final native IntelliJ 2026.3: 31 UI/integration checks passed. Screenshots inspected; final resolved-preview alignment verified. 0.4.9 ZIP integrity/descriptor/layout classes and companion version checked (340,797 bytes). Installed plugin unchanged.
+
+
+0.4.10 Context7/JetBrains platform review:
+- Used Context7 SDK guidance and JetBrains inspections/call analysis/build against the imported plugin project. Initial IDE type-resolution errors cleared after synchronization/build; no toolbar rewrite was required.
+- Removed repeating per-request settings polling in favor of lifecycle-bound events; session-only changes no longer rebuild the environment selector.
+- Cached Close actions retain their original request target. Queued focus ignores inactive/disposed editors; workspace references and data providers are released on disposal.
+- Flow history is a Disposer child; discovery/route expansion/OpenAPI work has cooperative cancellation checkpoints. Added six behavioral regressions.
+- Full baseline: 126 plugin + 5 companion tests passed, zero failures/errors/skips. JetBrains build succeeded and seven inspected implementation files reported zero errors. See PLATFORM_REVIEW_0.4.10.md.
+- Final native IntelliJ 2026.3: 48 UI/integration checks passed. 0.4.10 ZIP integrity/version/implementation classes verified (341,334 bytes). Installed plugin unchanged; changes are local.

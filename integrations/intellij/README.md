@@ -2,7 +2,7 @@
 
 This plugin provides two tabs in the **Bruno Flows** tool window: **APIs** for discovering and sending requests to Java Spring controller endpoints, and **Flows** for running saved Bruno flow files through the CLI.
 
-Version **0.4.9** implements the core request workspace from the [usability and capability plan](UX_PLAN.md). Project-wide persisted history, collection saving, richer discovery, and visual flow editing remain planned.
+Version **0.4.10** implements the core request workspace from the [usability and capability plan](UX_PLAN.md). Project-wide persisted history, collection saving, richer discovery, and visual flow editing remain planned.
 
 ## Browse and send controller APIs
 
@@ -71,7 +71,7 @@ Building the plugin or running `runIde` does not install it in your regular IDE.
 1. Build the archive with `./gradlew buildPlugin` from this directory.
 2. In your regular IntelliJ IDEA, open **Settings → Plugins**.
 3. Open the gear menu and select **Install Plugin from Disk…**.
-4. Select `build/distributions/bruno-intellij-plugin-0.4.9.zip` without extracting it. Use this same action to update an installed older version.
+4. Select `build/distributions/bruno-intellij-plugin-0.4.10.zip` without extracting it. Use this same action to update an installed older version.
 5. Restart the IDE if prompted, then open a project and choose **View → Tool Windows → Bruno**. You can also search for **Bruno: Open Flows** using Find Action.
 
 If the tool window is missing, check that **Bruno Flows** appears and is enabled under **Settings → Plugins → Installed**.
@@ -248,6 +248,8 @@ History is **project-session only**: latest 10 runs within an approximately 5 Mi
 
 Choose **Bruno → Flows → Import JSON…**, select your JSON file, then choose a destination Bruno collection folder. The action is available before any flows exist and beside Runner settings in the normal workspace. The imported file opens and is selected automatically; click **Run Flow** when ready. Import does not execute scripts or requests.
 
+Try the [complete JSON scenario collection](../../examples/flows/scenarios/README.md), covering all 11 node types, login/token mapping, polling, CSV/JSON datasets, sub-flows, request overrides, and failure handling. It includes supporting requests, a local demo API, and expected input/output results. Choose `examples/flows/scenarios` as the destination collection to preserve its relative resource paths; configure `baseUrl` in the collection environment used by the flow CLI.
+
 Both desktop exports (`type: "bruno-flow"`, `version: 1`, `name`, `flow`) and raw graph JSON (`nodes`/`edges`) are supported. Import validates strict JSON, graph structure, node types, unique IDs, connections, numeric positions and collection-relative references. It preserves configuration, viewport and node mappings while removing captured execution/UI state. Files over 10 MiB or deeper than 64 nesting levels are rejected.
 
 Bru collections receive `.flow.bru`; OpenCollection YAML collections receive `.flow.yml` in valid JSON-compatible YAML syntax. A new destination folder receives collection metadata. Existing files are preserved; duplicate imports get a numbered filename. Referenced request/subflow/dataset files are not bundled and must exist in the destination collection when running. Relative references stay portable; internal absolute references become relative, and references escaping the destination are rejected.
@@ -284,3 +286,13 @@ See [the Serena review](CODE_REVIEW_0.4.8.md) for scope, regression evidence and
 - Existing native themes, breakpoints, draft state, request/response layout and execution behavior are preserved.
 
 See [the UI review](UI_REVIEW_0.4.9.md) for the Stitch reference and verification.
+
+
+### 0.4.10 Context7 and JetBrains platform review
+
+- Request editors react to environment/session changes through lifecycle-bound message-bus subscriptions; idle per-tab polling is removed.
+- Cached Close actions retain their original request target; queued URL focus requests ignore closed or inactive tabs.
+- Flow history follows Disposer ownership. Disposed API workspaces release tab references and data providers.
+- Cached discovery, route expansion and OpenAPI generation include cooperative cancellation checkpoints.
+
+See [the platform review](PLATFORM_REVIEW_0.4.10.md) for SDK guidance, IDE findings and validation.

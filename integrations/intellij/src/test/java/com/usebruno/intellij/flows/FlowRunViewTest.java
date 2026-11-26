@@ -37,7 +37,7 @@ public class FlowRunViewTest extends BrunoPlatformTestCase {
             var failed=history.add(Instant.now(),"failed.flow.bru","",1,2,report.replaceFirst("\"status\":\"success\",\"duration\":1","\"status\":\"failed\",\"duration\":1"),"failed");
             view.refresh(failed); assertEquals("First failed step is selected",1,list.getSelectedIndex());
             history.clear(); view.refresh(null); assertEquals(0,list.getModel().getSize()); assertTrue(output.getText().contains("No run"));
-        } finally { if (frame!=null) frame.dispose(); view.dispose(); history.dispose(); UIManager.setLookAndFeel(previous); com.intellij.ui.JBColor.setDark(wasDark); }
+        } finally { if (frame!=null) frame.dispose(); com.intellij.openapi.util.Disposer.dispose(view); history.dispose(); UIManager.setLookAndFeel(previous); com.intellij.ui.JBColor.setDark(wasDark); }
     }
     public void testLargeHistoryLoadsInOneBatchAndLimitsPreviewWithoutTruncatingStoredReport() throws Exception {
         var report=new com.google.gson.JsonObject(); var entries=new com.google.gson.JsonArray();
@@ -67,7 +67,7 @@ public class FlowRunViewTest extends BrunoPlatformTestCase {
             // Drain any cancelled worker callback; it must not restore cleared data.
             for (int i=0;i<10;i++) { com.intellij.util.ui.UIUtil.dispatchAllInvocationEvents(); Thread.sleep(10); }
             assertEquals(0,list.getModel().getSize()); assertTrue(output.getText().contains("No run"));
-        } finally { view.dispose(); history.dispose(); }
+        } finally { com.intellij.openapi.util.Disposer.dispose(view); history.dispose(); }
     }
     public void testRunButtonCapturesRealStepIoAndDeletesTemporaryReport() throws Exception {
         var preferences=com.intellij.openapi.application.ApplicationManager.getApplication().getService(BrunoPreferences.class);

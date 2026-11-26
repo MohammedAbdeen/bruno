@@ -41,6 +41,7 @@ final class SpringEndpointScanner {
     }
 
     static void inspectClass(PsiClass type, List<ApiEndpoint> endpoints, List<String> warnings) {
+        ProgressManager.checkCanceled();
         for (PsiClass inner : type.getInnerClasses()) inspectClass(inner, endpoints, warnings);
         if (type.isInterface() || type.hasModifierProperty(PsiModifier.ABSTRACT) || !isController(type, new HashSet<>())) return;
         Mapping parent;
@@ -67,6 +68,7 @@ final class SpringEndpointScanner {
                 if (verbs.isEmpty()) verbs = List.of("ANY");
                 int variant = 0;
                 for (String prefix : parent.paths()) for (String suffix : mapping.paths()) for (String verb : verbs) {
+                    ProgressManager.checkCanceled();
                     String path = join(prefix, suffix);
                     String key = verb + " " + path + " " + method.getSignature(PsiSubstitutor.EMPTY);
                     if (!seen.add(key)) continue;
@@ -84,6 +86,7 @@ final class SpringEndpointScanner {
     }
 
     private static boolean isController(PsiClass type, Set<PsiClass> seen) {
+        ProgressManager.checkCanceled();
         if (!seen.add(type)) return false;
         for (PsiAnnotation annotation : type.getAnnotations()) {
             String name = annotation.getQualifiedName();
@@ -96,6 +99,7 @@ final class SpringEndpointScanner {
     }
 
     private static Mapping classMapping(PsiClass type, Set<PsiClass> seen) {
+        ProgressManager.checkCanceled();
         if (!seen.add(type)) return null;
         Mapping own = mapping(type);
         if (own != null) return own;
@@ -107,6 +111,7 @@ final class SpringEndpointScanner {
     }
 
     private static Mapping methodMapping(PsiMethod method, Set<PsiMethod> seen) {
+        ProgressManager.checkCanceled();
         if (!seen.add(method)) return null;
         Mapping own = mapping(method);
         if (own != null) return own;

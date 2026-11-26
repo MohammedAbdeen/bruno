@@ -12,6 +12,7 @@ public final class EndpointDiscovery {
     private SpringEndpointScanner.Result cached;
     public EndpointDiscovery(Project project) { this.project = project; }
     synchronized SpringEndpointScanner.Result scan() {
+        com.intellij.openapi.progress.ProgressManager.checkCanceled();
         long current = PsiModificationTracker.getInstance(project).getModificationCount();
         if (cached == null || revision != current) {
             var result = SpringEndpointScanner.scan(project);

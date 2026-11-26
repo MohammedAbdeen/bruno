@@ -24,6 +24,7 @@ final class OpenApiExport {
         JsonArray servers = new JsonArray(); servers.add(object("url", baseUrl)); spec.add("servers", servers);
         JsonObject paths = new JsonObject(); JsonArray skipped = new JsonArray();
         for (var endpoint : endpoints) {
+            com.intellij.openapi.progress.ProgressManager.checkCanceled();
             if (endpoint.path().contains("${") || !endpoint.path().startsWith("/")) { skipped.add(endpoint.path()); continue; }
             String path = endpoint.path().replaceAll("\\{([\\w]+):[^{}]*}", "{$1}");
             JsonObject item = paths.has(path) ? paths.getAsJsonObject(path) : new JsonObject(); paths.add(path, item);
@@ -85,6 +86,7 @@ final class OpenApiExport {
         return result == null ? null : result.toString();
     }
     private JsonObject schema(PsiType type, int depth) {
+        com.intellij.openapi.progress.ProgressManager.checkCanceled();
         String name = type.getCanonicalText();
         if (name.equals("boolean") || name.equals("java.lang.Boolean")) return object("type","boolean");
         if (Set.of("byte","short","int","long","java.lang.Integer","java.lang.Long","java.lang.Short","java.lang.Byte").contains(name)) return object("type","integer");

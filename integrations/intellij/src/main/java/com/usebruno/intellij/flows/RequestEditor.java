@@ -56,7 +56,6 @@ final class RequestEditor extends JPanel implements Disposable {
     private final JCheckBox redirects = new JCheckBox("Follow same-origin redirects");
     private final JPanel bodyCards = new JPanel(new CardLayout());
     private final javax.swing.Timer validateLater;
-    private final javax.swing.Timer settingsWatch;
     private long settingsRevision = -1;
     private final JLabel defaultHeaders = new JLabel();
     private boolean loading = true;
@@ -69,7 +68,6 @@ final class RequestEditor extends JPanel implements Disposable {
     private final JPanel request = new JPanel(new BorderLayout(6, 4));
     private final JPanel line = new JPanel();
     private boolean compact, responseTabs, adjustingSplit;
-    private int validation;
 
     RequestEditor(Project project, RequestDraft draft, Runnable onChange, Consumer<String> action) {
         super(new BorderLayout(6, 6));
@@ -96,11 +94,10 @@ final class RequestEditor extends JPanel implements Disposable {
         send = BrunoUi.button("Send", AllIcons.Actions.Execute, () -> { if (execution == null) send(null); else execution.stop("Cancelled"); });
         send.putClientProperty("JButton.buttonType", "default");
         send.setToolTipText("Send Bruno Request — Ctrl+Enter / Cmd+Enter (configurable in Keymap)");
-        settingsWatch = new javax.swing.Timer(1000, e -> {
-            if (settingsRevision != ApiSettings.get(project).revision()) refreshEnvironments();
-        });
-        settingsWatch.start();
         validateLater = new javax.swing.Timer(200, e -> { onChange.run(); validatePreview(); }); validateLater.setRepeats(false);
+        com.intellij.openapi.application.ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(ApiSettings.CHANGED, () -> {
+            if (!disposed && settingsRevision!=ApiSettings.get(project).revision()) refreshEnvironments();
+        });
         JPanel top = new JPanel(); top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         banner.setForeground(BrunoUi.AMBER);
         bannerPanel.add(banner, BorderLayout.CENTER);
@@ -302,12 +299,14 @@ final class RequestEditor extends JPanel implements Disposable {
     }
     void refreshEnvironments() {
         boolean before = loading; loading = true;
-        draft.fields.environment = ApiSettings.get(project).selected;
+        var settings=ApiSettings.get(project);
+        draft.fields.environment = settings.selected;
+        settingsRevision=settings.revision();
         environmentBadge.setText("Development bridge");
         environmentBadge.setVisible(!compact && draft.fields.bypassFilters);
         environment.removeAllItems();
-        for (var env : ApiSettings.get(project).environments) environment.addItem(env.name);
-        if (ApiSettings.get(project).environments.stream().noneMatch(e -> e.name.equals(draft.fields.environment))) {
+        for (var env : settings.environments) environment.addItem(env.name);
+        if (settings.environments.stream().noneMatch(e -> e.name.equals(draft.fields.environment))) {
             environment.addItem(draft.fields.environment);
         }
         environment.setSelectedItem(draft.fields.environment);
@@ -567,7 +566,7 @@ final class RequestEditor extends JPanel implements Disposable {
     private void showError(String message) { BrunoNotifications.error(project, message); }
     @Override public void dispose() {
         if (disposed) return;
-        changed(); disposed = true; validateLater.stop(); settingsWatch.stop(); response.disposeView();
+        changed(); disposed = true; validateLater.stop(); response.disposeView();
         if (execution != null) execution.stop("Cancelled");
     }
 }

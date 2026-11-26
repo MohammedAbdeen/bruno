@@ -27,6 +27,7 @@ final class ApiExplorerPanel extends JPanel implements Disposable {
     private final WorkspaceState state;
     private final JComboBox<String> globalEnvironment = new JComboBox<>();
     private boolean updatingEnvironment;
+    private long environmentProfilesRevision=-1;
     private final JLabel environmentCaption=new JLabel("Global environment");
     private final JButton manageEnvironments=BrunoUi.button("Environments…",AllIcons.General.Filter,this::environments);
     private final com.intellij.ui.components.JBTextField search = new com.intellij.ui.components.JBTextField();
@@ -255,14 +256,16 @@ final class ApiExplorerPanel extends JPanel implements Disposable {
             if (!settings.selected.equals(selected)) { settings.selected = selected; settings.changed(); }
         });
         ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(ApiSettings.CHANGED, () -> {
-            if (!disposed) { refreshGlobalEnvironment(); editors.values().forEach(RequestEditor::refreshEnvironments); }
+            if (!disposed) refreshGlobalEnvironment();
         });
         addComponentListener(new ComponentAdapter() { public void componentResized(ComponentEvent e) { layoutWorkspace(false); } });
         BrunoUi.onText(search, searchTimer::restart);
         modules.addActionListener(e -> { if (!changing) { state.module = Objects.toString(modules.getSelectedItem()); filter(); } });
         DataManager.registerDataProvider(this, key -> {
-            if (BrunoSendAction.EDITOR.is(key)) return activeEditor();
-            if (BrunoCloseAction.CLOSE.is(key)) return activeEditor() != null ? (Runnable) () -> close(activeEditor().draft.id) : null;
+            if (disposed) return null;
+            RequestEditor active=activeEditor();
+            if (BrunoSendAction.EDITOR.is(key)) return active;
+            if (BrunoCloseAction.CLOSE.is(key)) return active!=null ? (Runnable) () -> close(active.draft.id) : null;
             return null;
         });
         var global = ApplicationManager.getApplication().getService(BrunoPreferences.class);
@@ -404,7 +407,9 @@ final class ApiExplorerPanel extends JPanel implements Disposable {
             tabs.setTabComponentAt(index, title);
         }
         tabs.setSelectedComponent(editor); updateTitle(draft.id); showExplorer = false; layoutWorkspace(true);
-        RequestEditor focused = editor; SwingUtilities.invokeLater(focused::focusUrl);
+        RequestEditor focused = editor; SwingUtilities.invokeLater(() -> {
+            if (!disposed && editors.get(draft.id)==focused && tabs.getSelectedComponent()==focused) focused.focusUrl();
+        });
     }
     private void updateTitle(String id) {
         var editor = editors.get(id); if (editor == null) return;
@@ -460,8 +465,10 @@ final class ApiExplorerPanel extends JPanel implements Disposable {
         open(state.openEndpoint(endpoint, ApiSettings.get(project).selected));
     }
     private void refreshGlobalEnvironment() {
-        updatingEnvironment = true;
         var settings = ApiSettings.get(project);
+        if (environmentProfilesRevision==settings.profilesRevision()) return;
+        environmentProfilesRevision=settings.profilesRevision();
+        updatingEnvironment = true;
         globalEnvironment.removeAllItems(); settings.environments.forEach(e -> globalEnvironment.addItem(e.name));
         globalEnvironment.setSelectedItem(settings.selected);
         updatingEnvironment = false;
@@ -613,6 +620,8 @@ final class ApiExplorerPanel extends JPanel implements Disposable {
         rememberExpansion(); disposed = true; if (scan != null) scan.cancel();
         searchTimer.stop(); discoveryTimer.stop();
         ToolTipManager.sharedInstance().unregisterComponent(tree);
-        for (var editor : editors.values()) editor.dispose();
+        // Editors and listener connections are children in the Disposer tree.
+        editors.clear(); changing=true; tabs.removeAll(); changing=false;
+        DataManager.removeDataProvider(this);
     }
 }

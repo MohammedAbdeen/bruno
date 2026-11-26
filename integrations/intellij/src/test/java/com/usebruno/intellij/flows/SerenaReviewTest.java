@@ -53,7 +53,7 @@ public class SerenaReviewTest extends BrunoPlatformTestCase {
             assertFalse(history.runs().getFirst().console().contains("$ "));
             com.intellij.util.ui.UIUtil.dispatchAllInvocationEvents();
             assertFalse(((java.util.concurrent.atomic.AtomicBoolean)busy.get(panel)).get());
-        } finally { panel.dispose(); history.clear(); }
+        } finally { com.intellij.openapi.util.Disposer.dispose(panel); history.clear(); }
     }
     private static void waitFor(java.util.function.BooleanSupplier condition) throws Exception {
         long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(8);
